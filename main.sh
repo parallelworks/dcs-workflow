@@ -55,6 +55,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Load useful functions
+source resources/001_simulation_executor/inputs.sh
+export sshcmd="ssh -o StrictHostKeyChecking=no ${resource_publicIp}"
 source ./workflow-utils/workflow-libs.sh
 
 # Copy useful functions
@@ -79,8 +81,6 @@ fi
 
 
 echo; echo; echo "WAITING FOR 3DCS RUN JOBS TO COMPLETE"
-source resources/001_simulation_executor/inputs.sh
-export sshcmd="ssh -o StrictHostKeyChecking=no ${resource_publicIp}"
 
 submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
 if [ -z "${submitted_jobs}" ]; then
