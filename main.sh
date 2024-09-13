@@ -147,7 +147,7 @@ while true; do
 done
 kill ${simulation_executor_metering_pid}
 # Metering
-ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jobdir}/usage/ ${metering_user}@${metering_ip}:~/.3dcs/usage-pending
+ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jobdir}/usage/ ${metering_user}@${metering_ip}:~/.3dcs/usage-pending  >> metering.out 2>&1
 
 
 
@@ -182,7 +182,7 @@ export sshcmd="ssh -o StrictHostKeyChecking=no ${resource_publicIp}"
 export jobid=$(${sshcmd} cat ${resource_jobdir}/job_id.submitted)
 wait_job
 # Metering
-ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jobdir}/usage/ ${metering_user}@${metering_ip}:~/.3dcs/usage-pending
+ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jobdir}/usage/ ${metering_user}@${metering_ip}:~/.3dcs/usage-pending  >> metering.out 2>&1
 
 echo; echo; echo "ENSURING JOBS ARE CLEANED"
 ./cancel.sh > /dev/null 2>&1 

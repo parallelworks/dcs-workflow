@@ -5,7 +5,7 @@
 cat >> metering.sh <<HERE
 #!/bin/bash 
 while true; do
-    date >> ${resource_jobdir}/usage/$(hostname)-${job_number}"
+    date >> ${resource_jobdir}/usage/$(hostname)-${job_number}
     sleep \$((RANDOM % 30 + 30))
 done
 HERE
