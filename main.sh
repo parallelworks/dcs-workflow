@@ -147,7 +147,9 @@ while true; do
     done
     sleep 30
     submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
-    if [[ $? -eq 0 ]]; then
+    ssh_exit_code=$?
+    echo ${ssh_exit_code}
+    if [[ ${ssh_exit_code} -eq 0 ]]; then
         # Retry failed command
         echo "WARNING: Failed command -- ${sshcmd} find ${resource_jobdir} -name job_id.submitted"
         echo "Retrying ..."
