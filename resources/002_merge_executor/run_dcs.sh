@@ -7,7 +7,7 @@ cat >> metering.sh <<HERE
 #!/bin/bash
 fail_count=0
 while true; do
-    ssh -J ${resource_privateIp} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${metering_user}@${metering_ip} "date >> /home/${metering_user}/.3dcs/usage-pending/$(hostname)-${job_number}"
+    ssh -J ${resource_privateIp} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${metering_user}@${metering_ip} "date >> /home/${metering_user}/.3dcs/usage-pending/$(hostname)-${job_number}-merge"
     if [ \$? -ne 0 ]; then
         fail_count=\$((fail_count+1))
         echo "Unable to report usage to ${metering_user}@${metering_ip}."
