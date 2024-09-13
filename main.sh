@@ -1,6 +1,9 @@
 #!/bin/bash
 source inputs.sh
 
+# Need to forward agent to access metering server from controller
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/pw_id_rsa
 
 if [[ "${dcs_output_directory}" == "${dcs_model_directory}" || "${dcs_output_directory}" == "${dcs_model_directory}/"* ]]; then
     echo "Error: Output directory is a subdirectory of model directory." >&2
@@ -144,6 +147,17 @@ while true; do
     done
     sleep 30
     submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
+    if [[ $? -eq 0 ]]; then
+        # Retry failed command
+        echo "WARNING: Failed command -- ${sshcmd} find ${resource_jobdir} -name job_id.submitted"
+        echo "Retrying ..."
+        submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
+        if [[ $? -eq 0 ]]; then
+            echo "ERROR: Unable to obtain job status through SSH. Exiting workflow."
+            ./cancel.sh
+            exit 1
+        fi
+    fi
 done
 kill ${simulation_executor_metering_pid}
 # Metering
