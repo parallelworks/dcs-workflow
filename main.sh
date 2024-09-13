@@ -147,14 +147,12 @@ while true; do
     done
     sleep 30
     submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
-    ssh_exit_code=$?
-    echo ${ssh_exit_code}
-    if [[ ${ssh_exit_code} -eq 0 ]]; then
+    if [[ $? -ne 0 ]]; then
         # Retry failed command
         echo "WARNING: Failed command -- ${sshcmd} find ${resource_jobdir} -name job_id.submitted"
         echo "Retrying ..."
         submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
-        if [[ $? -eq 0 ]]; then
+        if [[ $? -ne 0 ]]; then
             echo "ERROR: Unable to obtain job status through SSH. Exiting workflow."
             ./cancel.sh
             exit 1
