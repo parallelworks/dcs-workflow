@@ -4,6 +4,9 @@ cd $(dirname $0)
 source inputs.sh
 source workflow-libs.sh
 
+# Prepare for metering
+mkdir ${resource_jobdir}/usage
+
 echo '#!/bin/bash' > cancel.sh
 chmod +x cancel.sh
 

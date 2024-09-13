@@ -1,6 +1,9 @@
 #!/bin/bash
 source inputs.sh
 
+# Need to forward agent to access metering server from controller
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/pw_id_rsa
 
 if [[ "${dcs_output_directory}" == "${dcs_model_directory}" || "${dcs_output_directory}" == "${dcs_model_directory}/"* ]]; then
     echo "Error: Output directory is a subdirectory of model directory." >&2
@@ -79,9 +82,13 @@ if [ ${return_code} -ne 0 ]; then
     exit 1
 fi
 
+# Metering code for simulation_executor
+./metering.sh &
+simulation_executor_metering_pid=$!
+echo "kill ${simulation_executor_metering_pid}" >> cancel.sh
+
 
 echo; echo; echo "WAITING FOR 3DCS RUN JOBS TO COMPLETE"
-
 submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
 if [ -z "${submitted_jobs}" ]; then
     echo "ERROR: No submitted jobs were found. Canceling workflow"
@@ -140,7 +147,23 @@ while true; do
     done
     sleep 30
     submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
+    if [[ $? -ne 0 ]]; then
+        # Retry failed command
+        echo "WARNING: Failed command -- ${sshcmd} find ${resource_jobdir} -name job_id.submitted"
+        echo "Retrying ..."
+        submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
+        if [[ $? -ne 0 ]]; then
+            echo "ERROR: Unable to obtain job status through SSH. Exiting workflow."
+            ./cancel.sh
+            exit 1
+        fi
+    fi
 done
+kill ${simulation_executor_metering_pid}
+# Metering
+ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jobdir}/usage/ ${metering_user}@${metering_ip}:~/.3dcs/usage-pending  >> metering.out 2>&1
+
+
 
 if ! [ -z "${FAILED_JOBS}" ]; then
     echo "ERROR: Failed jobs - ${FAILED_JOBS}. Exiting workflow"
@@ -161,6 +184,10 @@ if [ ${return_code} -ne 0 ]; then
     exit 1
 fi
 
+# Metering code for merge_executor
+./metering.sh &
+merge_executor_metering_pid=$!
+echo "kill ${merge_executor_metering_pid}" >> cancel.sh
 
 echo; echo; echo "WAITING FOR 3DCS MERGE JOBS TO COMPLETE"
 source resources/002_merge_executor/inputs.sh
@@ -168,6 +195,8 @@ export sshcmd="ssh -o StrictHostKeyChecking=no ${resource_publicIp}"
 
 export jobid=$(${sshcmd} cat ${resource_jobdir}/job_id.submitted)
 wait_job
+# Metering
+ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jobdir}/usage/ ${metering_user}@${metering_ip}:~/.3dcs/usage-pending  >> metering.out 2>&1
 
 echo; echo; echo "ENSURING JOBS ARE CLEANED"
 ./cancel.sh > /dev/null 2>&1 
