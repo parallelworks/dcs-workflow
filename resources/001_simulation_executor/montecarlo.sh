@@ -40,7 +40,6 @@ DCSLOAD ${dcs_model_file}
 
 DCS_CFG_SETTING ${dcs_thread} 0
 
-\\DCSSIMU_RUN_WITH_SEED 1 ${dcs_num_seeds} ${case_index} ${dcs_concurrency}
 DCSSIMU_RUN_WITH_SEED 1 ${dcs_num_seeds} ${dcs_concurrency} ${case_index}
 DCS_DATA ${out_hst}
 END
