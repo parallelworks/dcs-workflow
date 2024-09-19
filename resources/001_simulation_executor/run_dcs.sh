@@ -18,6 +18,7 @@ metering_pid=$!
 SECONDS=0
 eval "${dcs_run}"  macroScript.txt
 kill ${metering_pid}
+mv ${resource_jobdir}/usage/$(hostname)-${job_number} ${resource_jobdir}/usage_completed/$(hostname)-${job_number}
 
 # Results is own by root
 sudo chmod 777 Results/ -R
