@@ -132,7 +132,7 @@
             label='Max Workers per Node' 
             type='integer' 
             min="1" 
-            max="10" 
+            max="30" 
             help='To reduce compute costs, estimate the required memory and maximize memory utilization by fitting as many workers as possible in a single node.'
             value='1'
         ></param>

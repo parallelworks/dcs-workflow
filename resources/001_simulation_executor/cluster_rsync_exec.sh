@@ -106,6 +106,7 @@ for case_index in $(seq 1 ${dcs_concurrency}); do
     case_dir=${resource_jobdir}/worker_${case_index}
     echo; echo "  Case ${case_index}"
     cp ${resource_jobdir}/${dcs_model_file} ${case_dir}
+    cp -r ${fea_dir} ${case_dir}
 
     submit_job_sh=${case_dir}/run_case.sh
     echo "  Job script ${submit_job_sh}"

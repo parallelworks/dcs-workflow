@@ -66,7 +66,7 @@ def process_wtx_file(wtx_file_path, search_file_paths):
     for line in lines:
         for file_path in search_file_paths:
             if file_path in line:
-                line = replace_between_angle_brackets(line, '..\\' + fea_dir + '\\' + file_path)
+                line = replace_between_angle_brackets(line, '.\\' + fea_dir + '\\' + file_path)
         new_wtx_file_lines.append(line)
     return new_wtx_file_lines, encoding
 
