@@ -4,15 +4,6 @@ cd $(dirname $0)
 source inputs.sh
 source workflow-libs.sh
 
-# Make sure controller has ssh access to the metering node
-host=${metering_user}@${metering_ip}
-if ssh -q -o BatchMode=yes -o ConnectTimeout=5 -J usercontainer ${host} "echo 2>&1"; then
-    echo "SSH connection to ${host} is successful."
-else
-    echo "SSH connection to ${host} failed. Exiting."
-    exit 1  # Exit the script with a non-zero status
-fi
-
 if [[ ${dcs_dry_run} == "true" ]]; then
     echo "RUNNING THE WORKFLOW IN DRY RUN MODE"
     mv dry_run.sh run_dcs.sh 

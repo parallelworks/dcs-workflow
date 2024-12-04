@@ -1,10 +1,6 @@
 #!/bin/bash
 source inputs.sh
 
-# Need to forward agent to access metering server from controller
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/pw_id_rsa
-
 if [[ "${dcs_output_directory}" == "${dcs_model_directory}" || "${dcs_output_directory}" == "${dcs_model_directory}/"* ]]; then
     echo "Error: Output directory is a subdirectory of model directory." >&2
     exit 1
