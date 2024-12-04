@@ -60,7 +60,6 @@ source ./workflow-utils/workflow-libs.sh
 
 # Copy useful functions
 cp \
-    ./workflow-utils/load_bucket_credentials_ssh.sh \
     ./workflow-utils/cpu_and_memory_usage.py \
     ./workflow-utils/cpu_and_memory_usage_requirements.yaml \
     resources/001_simulation_executor/
@@ -68,7 +67,19 @@ cp \
 cp -r dcs_environment resources/001_simulation_executor/
 cp -r dcs_environment resources/002_merge_executor/
 
-cp ./workflow-utils/load_bucket_credentials_ssh.sh resources/002_merge_executor/
+echo; echo; echo "SENDING BUCKET CREDENTIALS"
+${pw_job_dir}/workflow-utils/bucket_token_generator.py --bucket_id ${dcs_bucket_id} --token_format text > bucket_credentials
+source bucket_credentials
+# Check if BUCKET_NAME is empty
+if ! [ -n "${BUCKET_NAME}" ]; then
+    echo "ERROR: Unable to load bucket credentials!"
+    exit 1
+fi
+scp bucket_credentials ${resource_publicIp}:${resource_jobdir}/bucket_credentials
+
+./reload_bucket_credentials.sh &
+reload_bucket_credential_pid=$!
+echo "kill ${reload_bucket_credential_pid} # bucket credentials" >> cancel.sh
 
 echo; echo; echo "PREPARING AND SUBMITTING 3DCS RUN JOBS"
 single_cluster_rsync_exec resources/001_simulation_executor/cluster_rsync_exec.sh

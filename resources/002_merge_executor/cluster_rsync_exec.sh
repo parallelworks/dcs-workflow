@@ -31,11 +31,11 @@ fi
 # Main script
 cat inputs.sh >> merge.sh
 cat dcs_environment/${dcs_version}.sh >> merge.sh
-cat load_bucket_credentials_ssh.sh >> merge.sh
+echo "source ${resource_jobdir}/bucket_credentials" >> merge.sh
 cat transfer_inputs.sh >> merge.sh
 cat ${dcs_analysis_type}.sh >> merge.sh
 cat run_dcs.sh >> merge.sh
-cat load_bucket_credentials_ssh.sh >> merge.sh
+echo "source ${resource_jobdir}/bucket_credentials" >> merge.sh
 cat clean_job_directory.sh >> merge.sh
 cat transfer_outputs.sh >> merge.sh
 

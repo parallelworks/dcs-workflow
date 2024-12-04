@@ -47,7 +47,7 @@ create_case(){
     cat activate_monitoring.sh >> ${case_dir}/run_case.sh
     cat run_dcs.sh >> ${case_dir}/run_case.sh
     cat plot_monitoring.sh >> ${case_dir}/run_case.sh
-    cat load_bucket_credentials_ssh.sh >> ${case_dir}/run_case.sh
+    echo "source ${resource_jobdir}/bucket_credentials" >> ${case_dir}/run_case.sh
     cat transfer_outputs.sh >> ${case_dir}/run_case.sh
 
 }
@@ -62,7 +62,7 @@ cat_slurm_logs() {
 
 
 echo; echo; echo "STARTING INPUT DATA TRANSFER"
-source load_bucket_credentials_ssh.sh
+source ${resource_jobdir}/bucket_credentials
 source transfer_inputs.sh
 
 if [[ ${dcs_dry_run} == "true" ]]; then
