@@ -1,6 +1,8 @@
 #!/bin/bash
 cd $(dirname $0)
 
+sudo chown -R ${USER}:pwuser /dcs/wine/apps/3dcs/.wine
+
 source inputs.sh
 source workflow-libs.sh
 
@@ -47,7 +49,7 @@ create_case(){
     cat activate_monitoring.sh >> ${case_dir}/run_case.sh
     cat run_dcs.sh >> ${case_dir}/run_case.sh
     cat plot_monitoring.sh >> ${case_dir}/run_case.sh
-    cat load_bucket_credentials_ssh.sh >> ${case_dir}/run_case.sh
+    echo "source ${resource_jobdir}/bucket_credentials" >> ${case_dir}/run_case.sh
     cat transfer_outputs.sh >> ${case_dir}/run_case.sh
 
 }
@@ -60,17 +62,9 @@ cat_slurm_logs() {
 	      
 }
 
-# Make sure controller has ssh access to the metering node
-host=${metering_user}@${metering_ip}
-if ssh -q -o BatchMode=yes -o ConnectTimeout=5 -J usercontainer ${host} "echo 2>&1"; then
-    echo "SSH connection to ${host} is successful."
-else
-    echo "SSH connection to ${host} failed. Exiting."
-    exit 1  # Exit the script with a non-zero status
-fi
 
 echo; echo; echo "STARTING INPUT DATA TRANSFER"
-source load_bucket_credentials_ssh.sh
+source ${resource_jobdir}/bucket_credentials
 source transfer_inputs.sh
 
 if [[ ${dcs_dry_run} == "true" ]]; then
