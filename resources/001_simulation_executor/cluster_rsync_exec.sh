@@ -1,6 +1,8 @@
 #!/bin/bash
 cd $(dirname $0)
 
+sudo chown -R ${USER}:pwuser /dcs/wine/apps/3dcs/.wine
+
 source inputs.sh
 source workflow-libs.sh
 
