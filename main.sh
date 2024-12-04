@@ -75,6 +75,7 @@ if ! [ -n "${BUCKET_NAME}" ]; then
     echo "ERROR: Unable to load bucket credentials!"
     exit 1
 fi
+${sshcmd} "mkdir -p ${resource_jobdir}"
 scp bucket_credentials ${resource_publicIp}:${resource_jobdir}/bucket_credentials
 
 ./reload_bucket_credentials.sh &
