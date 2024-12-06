@@ -132,7 +132,7 @@
             label='Walltime' 
             type='text' 
             help='Maximum walltime per job' 
-            value='02:00:00'
+            value='999:00:00'
             optional='true' 
         ></param>
         <param 
@@ -185,7 +185,7 @@
             label='Walltime' 
             type='text' 
             help='Maximum walltime per job' 
-            value='02:00:00'
+            value='999:00:00'
             optional='true' 
         ></param>
         <param 
