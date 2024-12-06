@@ -127,15 +127,6 @@
            optional='true'  
            dependent='false'
        ></param>
-       <param 
-            name='max_workers_per_node' 
-            label='Max Workers per Node' 
-            type='integer' 
-            min="1" 
-            max="10" 
-            help='To reduce compute costs, estimate the required memory and maximize memory utilization by fitting as many workers as possible in a single node.'
-            value='1'
-        ></param>
         <param 
             name='_sch__dd_time_e_' 
             label='Walltime' 
@@ -149,7 +140,7 @@
             label='Scheduler directives' 
             type='text' 
             help='e.g. --mem=1000;--gpus-per-node=1 - Use the semicolon character ; to separate parameters. Do not include the SBATCH keyword.' 
-            value=''
+            value='--exclusive'
             optional='true'  
         ></param>
     </section>
@@ -190,15 +181,6 @@
            dependent='false'
         ></param>
         <param 
-            name='max_workers_per_node' 
-            label='Max Workers per Node' 
-            type='integer' 
-            min="1" 
-            max="10" 
-            help='To reduce compute costs, estimate the required memory and maximize memory utilization by fitting as many workers as possible in a single node.'
-            value='1'
-        ></param>
-        <param 
             name='_sch__dd_time_e_' 
             label='Walltime' 
             type='text' 
@@ -211,7 +193,7 @@
             label='Scheduler directives' 
             type='text' 
             help='e.g. --mem=1000;--gpus-per-node=1 - Use the semicolon character ; to separate parameters. Do not include the SBATCH keyword.' 
-            value=''
+            value='--exclusive'
             optional='true'  
         ></param>
     </section>
