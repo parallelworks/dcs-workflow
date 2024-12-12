@@ -5,7 +5,9 @@ jobs:
     steps:
       - name: Main
         run: bash main.sh
-        cleanup: bash cancel.sh  || exit 0
+        cleanup: |
+          bash cancel.sh  || true
+          exit 0
 'on':
   execute:
     inputs:
