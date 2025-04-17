@@ -91,9 +91,9 @@ if [ ${return_code} -ne 0 ]; then
 fi
 
 # Metering code for simulation_executor
-./metering.sh &
-simulation_executor_metering_pid=$!
-echo "kill ${simulation_executor_metering_pid}" >> cancel.sh
+#./metering.sh &
+#simulation_executor_metering_pid=$!
+#echo "kill ${simulation_executor_metering_pid}" >> cancel.sh
 
 
 echo; echo; echo "WAITING FOR 3DCS RUN JOBS TO COMPLETE"
@@ -193,9 +193,9 @@ if [ ${return_code} -ne 0 ]; then
 fi
 
 # Metering code for merge_executor
-./metering.sh &
-merge_executor_metering_pid=$!
-echo "kill ${merge_executor_metering_pid}" >> cancel.sh
+#./metering.sh &
+#merge_executor_metering_pid=$!
+#echo "kill ${merge_executor_metering_pid}" >> cancel.sh
 
 echo; echo; echo "WAITING FOR 3DCS MERGE JOBS TO COMPLETE"
 source resources/002_merge_executor/inputs.sh
@@ -204,7 +204,7 @@ export sshcmd="ssh -o StrictHostKeyChecking=no ${resource_publicIp}"
 export jobid=$(${sshcmd} cat ${resource_jobdir}/job_id.submitted)
 wait_job
 # Metering
-ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jobdir}/usage/ ${metering_user}@${metering_ip}:~/.3dcs/usage-pending  >> metering.out 2>&1
+#ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jobdir}/usage/ ${metering_user}@${metering_ip}:~/.3dcs/usage-pending  >> metering.out 2>&1
 
 echo; echo; echo "ENSURING JOBS ARE CLEANED"
 ./cancel.sh > /dev/null 2>&1 
