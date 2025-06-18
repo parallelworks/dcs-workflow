@@ -1,0 +1,172 @@
+permissions:
+  - '*'
+jobs:
+  main:
+    steps:
+      - name: Main
+        run: bash main.sh
+        cleanup: |
+          bash cancel.sh  || true
+          exit 0
+'on':
+  execute:
+    inputs:
+      metering_user:
+        label: Metering User
+        type: string
+        default: honda
+        hidden: true
+      metering_ip:
+        label: Metering IP
+        type: string
+        default: 34.132.102.65
+        hidden: true
+      dcs:
+        type: group
+        label: 3DCS Options
+        items:
+          dry_run:
+            label: Dry run?
+            type: boolean
+            default: false
+            tooltip: Dry run generates the macroScript.txt file and executes every step of the workflow except running 3DCS
+          version:
+            label: 3DCS Version
+            type: dropdown
+            default: 8.0.0.2
+            tooltip: Select the 3DCS version
+            options:
+              - value: 8.0.0.2
+                label: 8.0.0.2
+              - value: 7.10.0.2
+                label: 7.10.0.2
+          analysis_type:
+            label: Analysis Type
+            type: dropdown
+            tooltip: Select Montecarlo simulation or contributor analysis (sensitivity)
+            default: montecarlo
+            options:
+              - value: montecarlo
+                label: Monte Carlo Simulation
+              - value: sensitivity
+                label: Contributor Analysis
+          bucket_id:
+            label: Bucket ID or namespace
+            type: string
+            tooltip: Type in the bucket ID string or namespace in the format [bucket-owner]/[bucket-name]
+          model_directory:
+            label: Model Path
+            type: string
+            tooltip: Directory within the bucket with the model and all the required files
+          output_directory:
+            label: Output Path
+            type: string
+            tooltip: Output directory within the bucket to store outputs and logs. It cannot be inside the Model Directory!
+          num_seeds:
+            label: Number of Monte Carlo Simulations
+            type: number
+            min: 1
+            max: 100000
+            default: 2000
+            hidden: ${{ 'montecarlo' !== inputs.dcs.analysis_type }}
+            ignore: ${{ .hidden }}
+            optional: ${{ .hidden }}
+          concurrency:
+            label: Number of Workers
+            type: number
+            min: 1
+            max: 50
+            default: 1
+            tooltip: Number of workers used to run the simulations. A SLURM job is submitted for each worker.
+          thread:
+            label: Number of Threads per Worker
+            type: number
+            min: 1
+            max: 64
+            default: 1
+            tooltip: Number of threads used to run the simulation. Be aware that N threads require more than N times the memory needed for a single thread.
+
+      pwrl_001_simulation_executor:
+        type: group
+        label: Simulation Executor
+        items:
+          monitoring_conda_dir:
+            label: PW Conda Directory
+            type: string
+            default: /dcs/pw/miniconda
+            hidden: true
+          monitoring_conda_env:
+            label: PW Conda Environment
+            type: string
+            default: psutil
+            hidden: true
+          resource:
+            label: Resource
+            type: compute-clusters
+            tooltip: Resource to run the simulation task
+            include-workspace: false
+          jobschedulertype:
+            label: Select Controller, SLURM Partition or PBS Queue
+            type: string
+            default: SLURM
+            hidden: true
+          _sch__dd_partition_e_:
+            type: slurm-partitions
+            label: SLURM partition
+            hidden: ${{ 'SLURM' !== inputs.pwrl_001_simulation_executor.jobschedulertype }}
+            ignore: ${{ .hidden }}
+            optional: true
+            tooltip: Partition to submit the job. Leave empty to let SLURM pick the optimal option.
+            resource: ${{ inputs.pwrl_001_simulation_executor.resource }}
+          _sch__dd_time_e_:
+            label: Walltime
+            type: string
+            default: '999:00:00'
+            tooltip: Maximum walltime per job
+          scheduler_directives:
+            label: Scheduler directives
+            type: string
+            default: '--exclusive'
+            tooltip: e.g. --mem=1000;--gpus-per-node=1 - Use the semicolon character ; to separate parameters. Do not include the SBATCH keyword.
+      pwrl_002_merge_executor:
+        type: group
+        label: Merge Executor
+        items:
+          monitoring_conda_dir:
+            label: PW Conda Directory
+            type: string
+            default: /dcs/pw/miniconda
+            hidden: true
+          monitoring_conda_env:
+            label: PW Conda Environment
+            type: string
+            default: psutil
+            hidden: true
+          resource:
+            label: Resource
+            type: compute-clusters
+            tooltip: Resource to run the simulation task
+            include-workspace: false
+          jobschedulertype:
+            label: Select Controller, SLURM Partition or PBS Queue
+            type: string
+            default: SLURM
+            hidden: true
+          _sch__dd_partition_e_:
+            type: slurm-partitions
+            label: SLURM partition
+            hidden: ${{ 'SLURM' !== inputs.pwrl_002_merge_executor.jobschedulertype }}
+            ignore: ${{ .hidden }}
+            optional: true
+            tooltip: Partition to submit the job. Leave empty to let SLURM pick the optimal option.
+            resource: ${{ inputs.pwrl_002_merge_executor.resource }}
+          _sch__dd_time_e_:
+            label: Walltime
+            type: string
+            default: '999:00:00'
+            tooltip: Maximum walltime per job
+          scheduler_directives:
+            label: Scheduler directives
+            type: string
+            default: '--exclusive'
+            tooltip: e.g. --mem=1000;--gpus-per-node=1 - Use the semicolon character ; to separate parameters. Do not include the SBATCH keyword.

@@ -27,15 +27,13 @@ else
 fi
 
 # User in the metering server to report usage to
-metering_user=$(python3 ./workflow-utils/print_organization_name.py)
-if [ $? -ne 0 ]; then
-    echo "Error: Could not obtain the name of the organization of user ${PW_USER}. Exiting."
-    exit 1
-fi
-
-
-sed -i "s/__metering_user__/${metering_user}/g" inputs.sh
-sed -i "s/__metering_user__/${metering_user}/g" inputs.json
+#metering_user=$(python3 ./workflow-utils/print_organization_name.py)
+#if [ $? -ne 0 ]; then
+#    echo "Error: Could not obtain the name of the organization of user ${PW_USER}. Exiting."
+#    exit 1
+#fi
+#sed -i "s/__metering_user__/${metering_user}/g" inputs.sh
+#sed -i "s/__metering_user__/${metering_user}/g" inputs.json
 
 # Check balance
 echo; echo "3DCS allocation balance"
