@@ -1,5 +1,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import argparse
+from datetime import datetime
+
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Plot cumulative job usage over time.')
+parser.add_argument('--start_date', type=str, default='', help='Start date in yy/mm/dd format (optional)')
+parser.add_argument('--end_date', type=str, default='', help='End date in yy/mm/dd format (optional)')
+args = parser.parse_args()
 
 # Read the CSV file
 input_file = 'processed_output.csv'
@@ -19,6 +27,22 @@ df['duration_hours'] = df.apply(calculate_duration, axis=1)
 
 # Extract date for grouping (use start_date)
 df['date'] = df['start_date'].dt.date
+
+# Convert input dates to datetime.date objects
+start_date = None
+end_date = None
+
+if args.start_date:
+    start_date = datetime.strptime(args.start_date, '%y/%m/%d').date()
+if args.end_date:
+    end_date = datetime.strptime(args.end_date, '%y/%m/%d').date()
+
+# Filter data based on start_date and end_date
+if start_date or end_date:
+    if start_date:
+        df = df[df['date'] >= start_date]
+    if end_date:
+        df = df[df['date'] <= end_date]
 
 # Calculate cumulative total usage per date
 total_usage = df.groupby('date')['duration_hours'].sum().reset_index()
@@ -58,7 +82,6 @@ print("Cumulative Total Usage Summary:")
 print(total_usage[['date', 'cumulative_hours']])
 print("\nCumulative Usage per User Summary:")
 print(user_usage_cumulative)
-
 
 # Print total usage per user
 print("\nTotal Usage per User (Hours):")

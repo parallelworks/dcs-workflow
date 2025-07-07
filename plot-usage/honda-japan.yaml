@@ -1,0 +1,39 @@
+permissions:
+  - '*'
+jobs:
+  main:
+    env:
+      metering_server: ${{ inputs.metering_user }}@${{ inputs.metering_ip }}
+    steps:
+      - name: Transfer Code
+        run: rsync -avz --progress plot-usage/ ${metering_server}:/home/${{ inputs.metering_user }}/plot-usage
+      - name: Generate Plot
+        run: |
+          ssh ${metering_server} \
+          START_DATE=${{ inputs.start_date }} \
+          END_DATE=${{ inputs.end_date }} \
+          bash /home/${{ inputs.metering_user }}/plot-usage/plot.sh
+      - name: Transfer Plot
+        run: |
+          scp ${metering_server}:/home/${{ inputs.metering_user }}/plot-usage/cumulative_usage_time_series.png .
+'on':
+  execute:
+    inputs:
+      start_date:
+        label: Start Date YY/MM/DD
+        type: string
+        optional: true
+      end_date:
+        label: End Date YY/MM/DD
+        type: string
+        optional: true
+      metering_user:
+        label: Metering User
+        type: string
+        default: honda
+        hidden: true
+      metering_ip:
+        label: Metering IP
+        type: string
+        default: 34.132.102.65
+        hidden: true
