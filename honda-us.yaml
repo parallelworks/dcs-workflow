@@ -33,9 +33,11 @@ jobs:
           version:
             label: 3DCS Version
             type: dropdown
-            default: 8.0.0.2
+            default: 8.2.0.0
             tooltip: Select the 3DCS version
             options:
+              - value: 8.2.0.0
+                label: 8.2.0.0
               - value: 8.0.0.2
                 label: 8.0.0.2
               - value: 7.10.0.2
