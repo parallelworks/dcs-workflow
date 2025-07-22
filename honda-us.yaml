@@ -8,6 +8,11 @@ jobs:
         cleanup: |
           bash cancel.sh  || true
           exit 0
+  stream:
+    steps:
+      - name: Stream Logs
+        run: bash stream.sh
+
 'on':
   execute:
     inputs:

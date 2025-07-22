@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Wait for inputs.sh to appear
+input_file="resources/001_simulation_executor/inputs.sh"
+while [ ! -f "${input_file}" ]; do
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for ${input_file}..."
+    sleep 10
+done
+
+if [ ${dcs_thread} -eq 1 ]; then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Number of threads must be larger than 1 to enable estimates"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Exiting job..."
+fi 
+
+# Source the inputs file
+source ${input_file}
+
+export sshcmd="ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 ${resource_publicIp}"
+
+wait_for_all_simulations_to_start() {
+    n_running_workers=$(${sshcmd} ls -d ${resource_jobdir}/worker_* | wc -l)
+    if [ $? -ne 0 ]; then
+        n_running_workers=0
+    fi
+    if [ "${n_running_workers}" -lt "${dcs_concurrency}" ]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - ${n_running_workers}/${dcs_concurrency} simulations started"
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for all simulations to start..."
+        sleep 15
+    fi
+}
+
+wait_for_all_simulations_to_start
+
+echo "$(date '+%Y-%m-%d %H:%M:%S') - All simulations are started!"
+echo; echo
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Calculating completion time estimates"
+
+log_files=$(${sshcmd} ls -d ${resource_jobdir}/worker_*/TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').txt)
+log_files=$(echo ${log_files} | tr ' ' ',')
+
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Log files:"
+echo ${log_files} | tr ',' '\n'
+
+while true; do
+    echo; echo; echo "$(date '+%Y-%m-%d %H:%M:%S')"
+    ${sshcmd} "python3 ${resource_jobdir}/001_simulation_executor/estimate_end_time.py ${log_files}"
+    sleep 120
+done
