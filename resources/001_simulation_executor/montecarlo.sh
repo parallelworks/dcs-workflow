@@ -1,12 +1,14 @@
 # CREATE MONTECARLO MACRO SCRIPT
 out_hst=$(basename ${dcs_model_file%.*})_${case_index}
 
+
 cat >> macroScript.txt <<END
 DCSVERS	200
 DCSMSSG	1  0
 DCSWORK .
 DCSCOMPLIANT 1
 DCSMECHANICAL 1
+DCS_CFG_MP_PROGRESS_SETTING 1
 
 DCSLOADDLL1 C:\Program Files\DCS\3DCS_MC_8_0_0_2\addIns\Extra_Dlls\dcu_lsqgeomv.dll
 DCSLOADDLL1 C:\Program Files\DCS\3DCS_MC_8_0_0_2\addIns\Extra_Dlls\dcu_3devmove.dll
