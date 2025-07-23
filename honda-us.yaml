@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: Stream Logs
         run: bash stream.sh
+        cleanup: |
+          bash cancel_stream.sh || true
+          exit 0
 
   estimate_end_time:
     steps:

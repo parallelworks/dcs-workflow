@@ -71,7 +71,7 @@ stream_logs() {
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting background log streaming"
 stream_logs &
 stream_pid=$!
-echo "kill ${stream_pid}" > cancel.sh
+echo "kill ${stream_pid}" > cancel_stream.sh
 
 # Wait for either COMPLETED file or stream_logs to exit
 while [ ! -f "COMPLETED" ]; do

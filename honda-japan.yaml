@@ -17,6 +17,10 @@ jobs:
     steps:
       - name: Estimate End Time
         run: bash estimate_end_time.sh
+        cleanup: |
+          bash cancel_stream.sh || true
+          exit 0
+
 
 'on':
   execute:
