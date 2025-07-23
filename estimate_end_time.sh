@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# Wait for inputs.sh to appear
-input_file="resources/001_simulation_executor/inputs.sh"
-while [ ! -f "${input_file}" ]; do
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for ${input_file}..."
+while [ ! -f "SUBMITTED" ]; do
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for simulations to be submitted"
     sleep 10
 done
+
+# Source the inputs file
+source resources/001_simulation_executor/inputs.sh
 
 if [ ${dcs_thread} -eq 1 ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Number of threads must be larger than 1 to enable estimates"

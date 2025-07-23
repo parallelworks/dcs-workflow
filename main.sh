@@ -93,6 +93,8 @@ fi
 simulation_executor_metering_pid=$!
 echo "kill ${simulation_executor_metering_pid}" >> cancel.sh
 
+# Write file to tell streaming and estimate that simulations are submitted
+date > SUBMITTED
 
 echo; echo; echo "WAITING FOR 3DCS RUN JOBS TO COMPLETE"
 submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)

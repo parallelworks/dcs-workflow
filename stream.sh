@@ -1,19 +1,18 @@
 #!/bin/bash
-
-# Wait for inputs.sh to appear
-input_file="resources/001_simulation_executor/inputs.sh"
-while [ ! -f "${input_file}" ]; do
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for ${input_file}..."
+while [ ! -f "SUBMITTED" ]; do
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for simulations to be submitted"
     sleep 10
 done
 
 # Source the inputs file
-source ${input_file}
+source resources/001_simulation_executor/inputs.sh
 
 export sshcmd="ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 ${resource_publicIp}"
 
+log_path="TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').txt"
+
 wait_for_all_simulations_to_start() {
-    n_running_workers=$(${sshcmd} ls -d ${resource_jobdir}/worker_*/TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').txt | wc -l)
+    n_running_workers=$(${sshcmd} ls -d ${resource_jobdir}/worker_*/${log_path} | wc -l)
     if [ $? -ne 0 ]; then
         n_running_workers=0
     fi
@@ -37,7 +36,7 @@ attempt=1
 
 while [ $attempt -le $max_retries ]; do
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Attempt $attempt of $max_retries to stream logs"
-    ${sshcmd} "tail -f ${resource_jobdir}/worker_*/TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').txt" 2>/dev/null
+    ${sshcmd} "tail -f ${resource_jobdir}/worker_*/${log_path}" 
     exit_code=$?
     if [ $exit_code -eq 0 ]; then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Streaming completed successfully"
