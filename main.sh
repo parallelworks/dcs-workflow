@@ -93,6 +93,8 @@ fi
 simulation_executor_metering_pid=$!
 echo "kill ${simulation_executor_metering_pid}" >> cancel.sh
 
+# Write file to tell streaming and estimate that simulations are submitted
+date > SUBMITTED
 
 echo; echo; echo "WAITING FOR 3DCS RUN JOBS TO COMPLETE"
 submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
@@ -207,4 +209,6 @@ ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jo
 echo; echo; echo "ENSURING JOBS ARE CLEANED"
 ./cancel.sh > /dev/null 2>&1 
 
+
+date > COMPLETED
 exit 0

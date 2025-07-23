@@ -8,6 +8,20 @@ jobs:
         cleanup: |
           bash cancel.sh  || true
           exit 0
+  stream:
+    steps:
+      - name: Stream Logs
+        run: bash stream.sh
+
+  estimate_end_time:
+    steps:
+      - name: Estimate End Time
+        run: bash estimate_end_time.sh
+        cleanup: |
+          bash cancel_stream.sh || true
+          exit 0
+
+
 'on':
   execute:
     inputs:
