@@ -39,7 +39,7 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - All simulations are started!"
 echo; echo
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Calculating completion time estimates"
 
-log_files=$(${sshcmd} ls -d ${resource_jobdir}/worker_*/${log_path}.txt)
+log_files=$(${sshcmd} ls -d ${resource_jobdir}/worker_*/${log_path})
 log_files=$(echo ${log_files} | tr ' ' ',')
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Log files:"
