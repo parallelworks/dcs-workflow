@@ -12,15 +12,19 @@ export sshcmd="ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o Serv
 log_path="TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').txt"
 
 wait_for_all_simulations_to_start() {
-    n_running_workers=$(${sshcmd} ls -d ${resource_jobdir}/worker_*/${log_path} | wc -l)
-    if [ $? -ne 0 ]; then
-        n_running_workers=0
-    fi
-    if [ "${n_running_workers}" -lt "${dcs_concurrency}" ]; then
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - ${n_running_workers}/${dcs_concurrency} simulations started"
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for all simulations to start..."
-        sleep 15
-    fi
+    while true; do
+        n_running_workers=$(${sshcmd} ls -d ${resource_jobdir}/worker_*/${log_path} | wc -l)
+        if [ $? -ne 0 ]; then
+            n_running_workers=0
+        fi
+        if [ "${n_running_workers}" -lt "${dcs_concurrency}" ]; then
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - ${n_running_workers}/${dcs_concurrency} simulations started"
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for all simulations to start..."
+            sleep 15
+        else
+            break
+        fi
+    done
 }
 
 wait_for_all_simulations_to_start
