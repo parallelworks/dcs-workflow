@@ -1,5 +1,4 @@
 #!/bin/bash
-
 while [ ! -f "SUBMITTED" ]; do
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for simulations to be submitted"
     sleep 10
@@ -8,14 +7,9 @@ done
 # Source the inputs file
 source resources/001_simulation_executor/inputs.sh
 
-if [ ${dcs_thread} -eq 1 ]; then
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Number of threads must be larger than 1 to enable estimates"
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Exiting job..."
-fi 
-
 export sshcmd="ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 ${resource_publicIp}"
-log_path="TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').txt"
 
+log_path="TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').txt"
 
 wait_for_all_simulations_to_start() {
     while true; do
@@ -35,21 +29,30 @@ wait_for_all_simulations_to_start() {
 
 wait_for_all_simulations_to_start
 
-exit 0
-
-
 echo "$(date '+%Y-%m-%d %H:%M:%S') - All simulations are started!"
 echo; echo
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Calculating completion time estimates"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Initiating streaming"
 
-log_files=$(${sshcmd} ls -d ${resource_jobdir}/worker_*/${log_path}.txt)
-log_files=$(echo ${log_files} | tr ' ' ',')
+# Retry loop for tail command
+max_retries=5
+retry_delay=10
+attempt=1
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Log files:"
-echo ${log_files} | tr ',' '\n'
-
-while true; do
-    echo; echo; echo "$(date '+%Y-%m-%d %H:%M:%S')"
-    ${sshcmd} "python3 ${resource_jobdir}/001_simulation_executor/estimate_end_time.py ${log_files}"
-    sleep 120
+while [ $attempt -le $max_retries ]; do
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Attempt $attempt of $max_retries to stream logs"
+    ${sshcmd} "tail -f ${resource_jobdir}/worker_*/${log_path}" 
+    exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Streaming completed successfully"
+        break
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - SSH tail failed with exit code $exit_code. Retrying in $retry_delay seconds..."
+        sleep $retry_delay
+        attempt=$((attempt + 1))
+    fi
 done
+
+if [ $attempt -gt $max_retries ]; then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Failed to stream logs after $max_retries attempts"
+    exit 1
+fi

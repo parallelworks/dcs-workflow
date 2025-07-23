@@ -13,10 +13,9 @@ if [ ${dcs_thread} -eq 1 ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Exiting job..."
 fi 
 
-# Source the inputs file
-source ${input_file}
-
 export sshcmd="ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 ${resource_publicIp}"
+log_path="TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').txt"
+
 
 wait_for_all_simulations_to_start() {
     while true; do
@@ -40,7 +39,7 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - All simulations are started!"
 echo; echo
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Calculating completion time estimates"
 
-log_files=$(${sshcmd} ls -d ${resource_jobdir}/worker_*/TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').txt)
+log_files=$(${sshcmd} ls -d ${resource_jobdir}/worker_*/${log_path}.txt)
 log_files=$(echo ${log_files} | tr ' ' ',')
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Log files:"
