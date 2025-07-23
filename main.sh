@@ -209,4 +209,6 @@ ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jo
 echo; echo; echo "ENSURING JOBS ARE CLEANED"
 ./cancel.sh > /dev/null 2>&1 
 
+
+date > COMPLETED
 exit 0

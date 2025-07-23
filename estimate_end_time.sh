@@ -47,6 +47,10 @@ echo ${log_files} | tr ',' '\n'
 
 while true; do
     echo; echo; echo "$(date '+%Y-%m-%d %H:%M:%S')"
+    if [ -f "COMPLETED" ]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Simulations are completed"
+        exit 0
+    else
     ${sshcmd} "python3 ${resource_jobdir}/001_simulation_executor/estimate_end_time.py ${log_files}"
     sleep 120
 done
