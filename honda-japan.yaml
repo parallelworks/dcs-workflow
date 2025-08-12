@@ -84,7 +84,7 @@ jobs:
             min: 1
             max: 100000
             default: 2000
-            hidden: ${{ 'montecarlo' !== inputs.dcs.analysis_type }}
+            hidden: ${{ 'montecarlo' !=inputs.dcs.analysis_type }}
             ignore: ${{ .hidden }}
             optional: ${{ .hidden }}
           concurrency:
@@ -129,7 +129,7 @@ jobs:
           _sch__dd_partition_e_:
             type: slurm-partitions
             label: SLURM partition
-            hidden: ${{ 'SLURM' !== inputs.pwrl_001_simulation_executor.jobschedulertype }}
+            hidden: ${{ 'SLURM' !=inputs.pwrl_001_simulation_executor.jobschedulertype }}
             ignore: ${{ .hidden }}
             optional: true
             tooltip: Partition to submit the job. Leave empty to let SLURM pick the optimal option.
@@ -171,7 +171,7 @@ jobs:
           _sch__dd_partition_e_:
             type: slurm-partitions
             label: SLURM partition
-            hidden: ${{ 'SLURM' !== inputs.pwrl_002_merge_executor.jobschedulertype }}
+            hidden: ${{ 'SLURM' !=inputs.pwrl_002_merge_executor.jobschedulertype }}
             ignore: ${{ .hidden }}
             optional: true
             tooltip: Partition to submit the job. Leave empty to let SLURM pick the optimal option.
