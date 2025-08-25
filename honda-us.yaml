@@ -128,8 +128,6 @@ jobs:
           _sch__dd_partition_e_:
             type: slurm-partitions
             label: SLURM partition
-            hidden: ${{ 'SLURM' !=inputs.pwrl_001_simulation_executor.jobschedulertype }}
-            ignore: ${{ .hidden }}
             optional: true
             tooltip: Partition to submit the job. Leave empty to let SLURM pick the optimal option.
             resource: ${{ inputs.pwrl_001_simulation_executor.resource }}
@@ -170,8 +168,6 @@ jobs:
           _sch__dd_partition_e_:
             type: slurm-partitions
             label: SLURM partition
-            hidden: ${{ 'SLURM' !=inputs.pwrl_002_merge_executor.jobschedulertype }}
-            ignore: ${{ .hidden }}
             optional: true
             tooltip: Partition to submit the job. Leave empty to let SLURM pick the optimal option.
             resource: ${{ inputs.pwrl_002_merge_executor.resource }}
