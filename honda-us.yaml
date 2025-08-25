@@ -83,7 +83,7 @@ jobs:
             min: 1
             max: 100000
             default: 2000
-            hidden: ${{ 'montecarlo' !=inputs.dcs.analysis_type }}
+            hidden: ${{ 'montecarlo' != inputs.dcs.analysis_type }}
             ignore: ${{ .hidden }}
             optional: ${{ .hidden }}
           concurrency:
