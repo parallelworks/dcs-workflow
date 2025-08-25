@@ -15,7 +15,7 @@ def encode_string_to_base64(text):
 # Therefore, it is called by the main script using the reverse ssh tunnel
 # Prints the balance in json format
 
-ALLOCATION_NAME_3DCS = '3dcs-run-hours'
+ALLOCATION_NAME_3DCS = 'japan-3dcs-run-hours'
 PW_PLATFORM_HOST = os.environ.get('PW_PLATFORM_HOST')
 HEADERS = {"Authorization": "Basic {}".format(encode_string_to_base64(os.environ['PW_API_KEY']))}
 # ORGANIZATION_ID = os.environ.get('ORGANIZATION_ID')
