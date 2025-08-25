@@ -1,5 +1,6 @@
 #!/bin/bash
 source inputs.sh
+trap 'date > COMPLETED' EXIT
 
 if [[ "${dcs_output_directory}" == "${dcs_model_directory}" || "${dcs_output_directory}" == "${dcs_model_directory}/"* ]]; then
     echo "Error: Output directory is a subdirectory of model directory." >&2
