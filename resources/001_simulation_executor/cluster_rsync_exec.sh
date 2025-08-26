@@ -1,10 +1,11 @@
 #!/bin/bash
 cd $(dirname $0)
 
-sudo chown -R ${USER}:pwuser /dcs/wine/apps/3dcs/.wine
-
 source inputs.sh
 source workflow-libs.sh
+
+source dcs_environment/${dcs_version}.sh 
+sudo chown -R ${USER}:pwuser ${WINEPREFIX}
 
 # Prepare for metering
 mkdir ${resource_jobdir}/usage
