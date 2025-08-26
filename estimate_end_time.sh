@@ -30,6 +30,10 @@ wait_for_all_simulations_to_start() {
         else
             break
         fi
+        if [ -f "COMPLETED" ]; then
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - Simulations are completed"
+            exit 0
+        fi
     done
 }
 
