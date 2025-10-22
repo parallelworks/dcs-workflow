@@ -34,6 +34,16 @@ jobs:
         type: string
         default: 34.132.102.65
         hidden: true
+      run_hours_3dcs_group:
+        label: Name of the group to meter 3DCS run hours
+        type: string
+        default: us-3dcs-run-hours
+        hidden: true
+      org_name:
+        label: Organization Name
+        type: string
+        default: honda
+        hidden: true
       dcs:
         type: group
         label: 3DCS Options
