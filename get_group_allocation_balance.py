@@ -1,6 +1,7 @@
 import os
 import requests
 from base64 import b64encode
+import sys
 
 def encode_string_to_base64(text):
     # Convert the string to bytes
@@ -15,21 +16,25 @@ def encode_string_to_base64(text):
 # Therefore, it is called by the main script using the reverse ssh tunnel
 # Prints the balance in json format
 
-ALLOCATION_NAME_3DCS = 'japan-3dcs-run-hours'
+ALLOCATION_NAME_3DCS = sys.argv[1]
+CUSTOMER_ORG_NAME = sys.argv[2]
+
 PW_PLATFORM_HOST = os.environ.get('PW_PLATFORM_HOST')
 HEADERS = {"Authorization": "Basic {}".format(encode_string_to_base64(os.environ['PW_API_KEY']))}
 # ORGANIZATION_ID = os.environ.get('ORGANIZATION_ID')
-# GT_ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams?organization={ORGANIZATION_ID}'
-GT_ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams'
+# ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams?organization={ORGANIZATION_ID}'
+# ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams'
+ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/organizations/{CUSTOMER_ORG_NAME}/groups'
+
 
 def get_balance():
-    res = requests.get(GT_ORGANIZATION_URL, headers = HEADERS)
+    res = requests.get(ORGANIZATION_URL, headers = HEADERS)
     
     for group in res.json():
         if group['name'] == ALLOCATION_NAME_3DCS:
-            allocation_total = group['allocations']['total']['value']
+            allocation_total = group['allocations']['total']
             if 'used' in group['allocations']:
-                allocation_used = group['allocations']['used']['value']
+                allocation_used = group['allocations']['used']
             else:
                 allocation_used = 0
             

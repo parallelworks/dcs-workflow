@@ -38,7 +38,9 @@ fi
 
 # Check balance
 echo; echo "3DCS allocation balance"
-python3 get_group_allocation_balance.py
+python3 get_group_allocation_balance.py ${run_hours_3dcs_group} ${org_name}
+
+
 if [ $? -ne 0 ]; then
     echo "Error: No 3DCS balance is available. Exiting."
     exit 1

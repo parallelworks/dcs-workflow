@@ -39,11 +39,16 @@ LOCK_FILE_PATH = os.path.join(DCS_DIR, 'update-3dcs-usage.lock')
 CUSTOMER_ORG_ID = '63572a4c1129281e00477a0c'
 PW_PLATFORM_HOST = os.environ.get('PW_PLATFORM_HOST')
 PW_API_KEY = os.environ.get('PW_API_KEY')
+CUSTOMER_ORG_NAME = os.environ.get('CUSTOMER_ORG_NAME')
+
+group_name_to_id_mapping = {}
 HEADERS = {"Authorization": "Basic {}".format(encode_string_to_base64(os.environ['PW_API_KEY']))}
 
 GROUP_NAME: str = '3dcs-run-hours'
-#ORGANIZATION_URL: str = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams?organization={CUSTOMER_ORG_ID}'
-ORGANIZATION_URL: str = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams'
+# ORGANIZATION_URL: str = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams?organization={CUSTOMER_ORG_ID}'
+# ORGANIZATION_URL: str = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams'
+ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/organizations/{CUSTOMER_ORG_NAME}/groups'
+
 
 CONNECTED_WORKERS = {}
 
@@ -90,10 +95,8 @@ def update_group_allocation_used(group_id, allocation_used):
     return http_put_sync(url, payload)
 
 def get_group_id(group_name):
-    #url = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams?organization={CUSTOMER_ORG_ID}'
-    url = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams'
 
-    res = requests.get(url, headers = get_headers())
+    res = requests.get(ORGANIZATION_URL, headers = get_headers())
 
     for group in res.json():
         group_name_to_id_mapping[group['name']] = group['id']
