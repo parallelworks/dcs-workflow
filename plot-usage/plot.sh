@@ -8,10 +8,11 @@ echo $END_DATE
 python3 create_csv.py
 python3 consolidate_csv.py
 
-if [[ "$START_DATE" != "undefined" ]]; then
+if [[ -n "$START_DATE" && "$START_DATE" != "undefined" ]]; then
     start_date_args="--start_date ${START_DATE}"
 fi
-if [[ "$END_DATE" != "undefined" ]]; then
+
+if [[ -n "$END_DATE" && "$END_DATE" != "undefined" ]]; then
     end_date_args="--end_date ${END_DATE}"
 fi
 
