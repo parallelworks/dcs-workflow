@@ -69,7 +69,7 @@ cp -r dcs_environment resources/001_simulation_executor/
 cp -r dcs_environment resources/002_merge_executor/
 
 echo; echo; echo "SENDING BUCKET CREDENTIALS"
-${pw_job_dir}/workflow-utils/bucket_token_generator.py --bucket_id ${dcs_bucket_id} --token_format text > bucket_credentials
+pw buckets get-token pw://${dcs_bucket_id} > bucket_credentials
 source bucket_credentials
 # Check if BUCKET_NAME is empty
 if ! [ -n "${BUCKET_NAME}" ]; then
