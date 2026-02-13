@@ -72,7 +72,7 @@ echo; echo; echo "SENDING BUCKET CREDENTIALS"
 pw buckets get-token pw://${dcs_bucket_id} > bucket_credentials
 source bucket_credentials
 # Check if BUCKET_NAME is empty
-if ! [ -n "${BUCKET_NAME}" ]; then
+if ! [ -n "${BUCKET_URI}" ]; then
     echo "ERROR: Unable to load bucket credentials!"
     exit 1
 fi

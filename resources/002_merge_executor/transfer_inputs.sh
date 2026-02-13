@@ -3,8 +3,8 @@
 
 # Transfer model
 # dcs_model_directory can end with or without /
-aws s3 sync s3://$BUCKET_NAME/${dcs_model_directory} .
-aws s3 sync s3://$BUCKET_NAME/${dcs_output_directory}/${USER}/${workflow_name}/${job_number} .
+aws s3 sync ${BUCKET_URI}/${dcs_model_directory} .
+aws s3 sync ${BUCKET_URI}/${dcs_output_directory}/${USER}/${workflow_name}/${job_number} .
 
 # Find all files ending in ".wtx" in the current directory, excluding subdirectories
 dcs_model_file=$(find . -maxdepth 1 -type f -name "*.wtx")
