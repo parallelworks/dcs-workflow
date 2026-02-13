@@ -5,9 +5,9 @@ mkdir tmp-data-transfer
 cd tmp-data-transfer
 
 # dcs_model_directory can end with or without /
-aws s3 sync s3://$BUCKET_NAME/${dcs_model_directory} .
+aws s3 sync ${BUCKET_URI}/${dcs_model_directory} .
 
-# User aws s3 cp --recursive ../test s3://$BUCKET_NAME/path/to/dir/test to transfer to the bucket
+# User aws s3 cp --recursive ../test ${BUCKET_URI}/path/to/dir/test to transfer to the bucket
 
 # Find all files ending in ".wtx" in the current directory, excluding subdirectories
 export dcs_model_file=$(find . -type f -name "*.wtx")
