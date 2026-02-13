@@ -11,11 +11,13 @@ jobs:
   stream:
     steps:
       - name: Stream Logs
+        early-cancel: any-job-failed
         run: bash stream.sh
 
   estimate_end_time:
     steps:
       - name: Estimate End Time
+        early-cancel: any-job-failed
         run: bash estimate_end_time.sh
         cleanup: |
           bash cancel_stream.sh || true
