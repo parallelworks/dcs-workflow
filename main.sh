@@ -1,6 +1,8 @@
 #!/bin/bash
 source inputs.sh
-trap 'date > COMPLETED' EXIT
+echo '#!/bin/bash' > cancel.sh
+chmod +x cancel.sh
+trap './cancel.sh > /dev/null 2>&1; date > COMPLETED' EXIT
 
 if [[ "${dcs_output_directory}" == "${dcs_model_directory}" || "${dcs_output_directory}" == "${dcs_model_directory}/"* ]]; then
     echo "Error: Output directory is a subdirectory of model directory." >&2
@@ -178,12 +180,14 @@ ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jo
 
 if ! [ -z "${FAILED_JOBS}" ]; then
     echo "ERROR: Failed jobs - ${FAILED_JOBS}. Exiting workflow"
+    ./cancel.sh
     exit 1
 fi
 
 # FIXME: We should run a different macroScript to produce the plots and data
 if [ "${dcs_concurrency}" -eq 1 ]; then
     echo "Merge job is not running because the number of workers is 1. Exiting workflow."
+    ./cancel.sh
     exit 0
 fi
 
