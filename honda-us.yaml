@@ -7,6 +7,7 @@ jobs:
         run: bash main.sh
         cleanup: |
           bash cancel.sh  || true
+          pkill -f "${PW_JOB_DIR}"
           exit 0
   stream:
     steps:
