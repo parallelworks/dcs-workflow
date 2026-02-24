@@ -212,5 +212,20 @@ wait_job
 # Metering
 ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jobdir}/usage/ ${metering_user}@${metering_ip}:~/.3dcs/usage-pending  >> metering.out 2>&1
 
+echo; echo; echo "ENSURING JOBS ARE CLEANED"
+./cancel.sh > /dev/null 2>&1 
+
+
 date > COMPLETED
+
+# Kill all descendant processes started by this script (background jobs, SSH connections, etc.)
+_kill_descendants() {
+    local pid
+    for pid in $(pgrep -P "$1" 2>/dev/null); do
+        _kill_descendants "$pid"
+        kill "$pid" 2>/dev/null || true
+    done
+}
+_kill_descendants $$
+
 exit 0
