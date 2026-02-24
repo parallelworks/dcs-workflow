@@ -7,7 +7,7 @@ jobs:
         run: bash main.sh
         cleanup: |
           source resources/001_simulation_executor/inputs.sh
-          bash cancel.sh  || true
+          timeout 180 bash cancel.sh  || true
           pkill -f "${PW_JOB_DIR}" || true
           exit 0
   stream:
