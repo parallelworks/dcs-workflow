@@ -212,9 +212,5 @@ wait_job
 # Metering
 ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jobdir}/usage/ ${metering_user}@${metering_ip}:~/.3dcs/usage-pending  >> metering.out 2>&1
 
-echo; echo; echo "ENSURING JOBS ARE CLEANED"
-./cancel.sh > /dev/null 2>&1 
-
-
 date > COMPLETED
 exit 0
