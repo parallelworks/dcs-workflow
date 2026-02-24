@@ -8,19 +8,18 @@ jobs:
         cleanup: |
           source resources/001_simulation_executor/inputs.sh
           timeout 180 bash cancel.sh  || true
-          pkill -f "${PW_JOB_DIR}" || true
           exit 0
   stream:
     steps:
       - name: Stream Logs
         early-cancel: any-job-failed
-        run: bash stream.sh
+        run: bash stream.sh > logs/stream/step_0/logs.out 2>&1 
 
   estimate_end_time:
     steps:
       - name: Estimate End Time
         early-cancel: any-job-failed
-        run: bash estimate_end_time.sh
+        run: bash estimate_end_time.sh > logs/estimate_end_time/step_0/logs.out 2>&1 
         cleanup: |
           bash cancel_stream.sh || true
           exit 0
