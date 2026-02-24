@@ -1,8 +1,6 @@
 #!/bin/bash
 source inputs.sh
-echo '#!/bin/bash' > cancel.sh
 chmod +x cancel.sh
-trap './cancel.sh > /dev/null 2>&1; date > COMPLETED' EXIT
 
 if [[ "${dcs_output_directory}" == "${dcs_model_directory}" || "${dcs_output_directory}" == "${dcs_model_directory}/"* ]]; then
     echo "Error: Output directory is a subdirectory of model directory." >&2
