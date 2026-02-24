@@ -1,7 +1,6 @@
 #!/bin/bash
 source inputs.sh
 chmod +x cancel.sh
-set -x
 
 if [[ "${dcs_output_directory}" == "${dcs_model_directory}" || "${dcs_output_directory}" == "${dcs_model_directory}/"* ]]; then
     echo "Error: Output directory is a subdirectory of model directory." >&2
@@ -228,5 +227,6 @@ _kill_descendants() {
 }
 _kill_descendants $$
 
+echo "$(date) Exiting job"
 echo "exit 0" >> cancel.sh
 exit 0
