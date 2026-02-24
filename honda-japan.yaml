@@ -4,7 +4,7 @@ jobs:
   main:
     steps:
       - name: Main
-        run: bash main.sh
+        run: bash main.sh > logs/main/step_0/logs.out 2>&1 
         cleanup: |
           source resources/001_simulation_executor/inputs.sh
           timeout 180 bash cancel.sh  || true
