@@ -82,7 +82,7 @@ scp bucket_credentials ${resource_publicIp}:${resource_jobdir}/bucket_credential
 
 ./reload_bucket_credentials.sh &
 reload_bucket_credential_pid=$!
-echo "kill ${reload_bucket_credential_pid} # bucket credentials" >> cancel.sh
+echo "kill ${reload_bucket_credential_pid} || true # bucket credentials" >> cancel.sh
 
 echo; echo; echo "PREPARING AND SUBMITTING 3DCS RUN JOBS"
 single_cluster_rsync_exec resources/001_simulation_executor/cluster_rsync_exec.sh
@@ -95,7 +95,7 @@ fi
 # Metering code for simulation_executor
 ./metering.sh &
 simulation_executor_metering_pid=$!
-echo "kill ${simulation_executor_metering_pid}" >> cancel.sh
+echo "kill ${simulation_executor_metering_pid} || true" >> cancel.sh
 
 # Write file to tell streaming and estimate that simulations are submitted
 date > SUBMITTED
@@ -201,7 +201,7 @@ fi
 # Metering code for merge_executor
 ./metering.sh &
 merge_executor_metering_pid=$!
-echo "kill ${merge_executor_metering_pid}" >> cancel.sh
+echo "kill ${merge_executor_metering_pid} || true" >> cancel.sh
 
 echo; echo; echo "WAITING FOR 3DCS MERGE JOBS TO COMPLETE"
 source resources/002_merge_executor/inputs.sh
@@ -228,4 +228,5 @@ _kill_descendants() {
 }
 _kill_descendants $$
 
+echo "exit 0" >> cancel.sh
 exit 0
