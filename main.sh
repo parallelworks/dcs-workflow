@@ -79,7 +79,7 @@ fi
 ${sshcmd} "mkdir -p ${resource_jobdir}"
 scp bucket_credentials ${resource_publicIp}:${resource_jobdir}/bucket_credentials
 
-./reload_bucket_credentials.sh &
+./reload_bucket_credentials.sh &> reload_bucket_credentials.log &
 reload_bucket_credential_pid=$!
 echo "kill ${reload_bucket_credential_pid} || true # bucket credentials" >> cancel.sh
 
