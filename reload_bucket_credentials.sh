@@ -2,7 +2,7 @@
 source resources/001_simulation_executor/inputs.sh
 set -x
 while true; do
-    sleep 900
+    sleep 300
     date
     pw buckets get-token pw://${dcs_bucket_id} > bucket_credentials
     source bucket_credentials
