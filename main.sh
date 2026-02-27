@@ -157,18 +157,23 @@ while true; do
         sleep 0.5
     done
     sleep 30
-    submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
-    if [[ $? -ne 0 ]]; then
-        # Retry failed command
-        echo "WARNING: Failed command -- ${sshcmd} find ${resource_jobdir} -name job_id.submitted"
-        echo "Retrying ..."
+    ssh_retries=10
+    ssh_retry_delay=60
+    while true; do
         submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
-        if [[ $? -ne 0 ]]; then
+        if [[ $? -eq 0 ]]; then
+            break
+        fi
+        ssh_retries=$((ssh_retries - 1))
+        if [[ ${ssh_retries} -le 0 ]]; then
             echo "ERROR: Unable to obtain job status through SSH. Exiting workflow."
             ./cancel.sh
             exit 1
         fi
-    fi
+        echo "WARNING: Failed command -- ${sshcmd} find ${resource_jobdir} -name job_id.submitted"
+        echo "Retrying in ${ssh_retry_delay} seconds... (${ssh_retries} retries remaining)"
+        sleep ${ssh_retry_delay}
+    done
 done
 kill ${simulation_executor_metering_pid}
 # Metering
