@@ -5,7 +5,6 @@ unset AWS_ACCESS_KEY_ID
 unset AWS_SECRET_ACCESS_KEY
 unset AWS_SESSION_TOKEN
 
-resource_jobdir=/home/Hanif/pw/jobs/marketplace.3dcshondajapan.latest/00041
 source ${resource_jobdir}/bucket_credentials
 
 # Loop until all variables are non-empty
