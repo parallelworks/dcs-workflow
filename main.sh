@@ -59,6 +59,25 @@ source resources/001_simulation_executor/inputs.sh
 export sshcmd="ssh -o StrictHostKeyChecking=no ${resource_publicIp}"
 source ./workflow-utils/workflow-libs.sh
 
+retry_ssh() {
+    local max_retries=10
+    local retry_delay=30
+    local attempt=1
+    while true; do
+        ${sshcmd} "$@"
+        local exit_code=$?
+        [[ ${exit_code} -eq 0 ]] && return 0
+        if [[ ${attempt} -ge ${max_retries} ]]; then
+            echo "ERROR: SSH command failed after ${max_retries} attempts: ${sshcmd} $*" >&2
+            return ${exit_code}
+        fi
+        echo "WARNING: SSH attempt ${attempt}/${max_retries} failed for: $*" >&2
+        echo "Retrying in ${retry_delay}s..." >&2
+        sleep ${retry_delay}
+        attempt=$((attempt + 1))
+    done
+}
+
 # Copy useful functions
 cp \
     ./workflow-utils/cpu_and_memory_usage.py \
@@ -76,7 +95,7 @@ if ! [ -n "${BUCKET_URI}" ]; then
     echo "ERROR: Unable to load bucket credentials!"
     exit 1
 fi
-${sshcmd} "mkdir -p ${resource_jobdir}"
+retry_ssh "mkdir -p ${resource_jobdir}"
 scp bucket_credentials ${resource_publicIp}:${resource_jobdir}/bucket_credentials
 
 ./reload_bucket_credentials.sh &> reload_bucket_credentials.log &
@@ -87,7 +106,7 @@ echo; echo; echo "PREPARING AND SUBMITTING 3DCS RUN JOBS"
 single_cluster_rsync_exec resources/001_simulation_executor/cluster_rsync_exec.sh
 return_code=$?
 if [ ${return_code} -ne 0 ]; then
-    ${sshcmd} ${resource_jobdir}/${resource_label}/cancel.sh
+    retry_ssh ${resource_jobdir}/${resource_label}/cancel.sh
     exit 1
 fi
 
@@ -100,10 +119,10 @@ echo "kill ${simulation_executor_metering_pid} || true" >> cancel.sh
 date > SUBMITTED
 
 echo; echo; echo "WAITING FOR 3DCS RUN JOBS TO COMPLETE"
-submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
+submitted_jobs=$(retry_ssh find ${resource_jobdir} -name job_id.submitted)
 if [ -z "${submitted_jobs}" ]; then
     echo "ERROR: No submitted jobs were found. Canceling workflow"
-    ${sshcmd} ${resource_jobdir}/${resource_label}/cancel.sh
+    retry_ssh ${resource_jobdir}/${resource_label}/cancel.sh
     exit 1
 fi
 
@@ -117,7 +136,7 @@ while true; do
         if [[ "${FAILED}" == "true" ]]; then
             echo "ERROR: Jobs [${FAILED_JOBS}] failed"
             echo "Canceling jobs"
-            ${sshcmd} ${resource_jobdir}/${resource_label}/cancel.sh
+            retry_ssh ${resource_jobdir}/${resource_label}/cancel.sh
             exit 1
         fi
         echo "  All jobs are completed. Please check job logs in directories [${case_dirs}] and results"
@@ -127,21 +146,21 @@ while true; do
     FAILED=false
 
     for sj in ${submitted_jobs}; do
-        jobid=$(${sshcmd} cat ${sj})
+        jobid=$(retry_ssh cat ${sj})
               
         if [[ ${jobschedulertype} == "SLURM" ]]; then
             get_slurm_job_status
             # If job status is empty job is no longer running
             if [ -z "${job_status}" ]; then
-                job_status=$($sshcmd sacct -j ${jobid}  --format=state | tail -n1)
+                job_status=$(retry_ssh sacct -j ${jobid}  --format=state | tail -n1)
                 if [[ "${job_status}" == *"FAILED"* ]]; then
                     echo "ERROR: SLURM job [${jobid}] failed"
                     FAILED=true
                     FAILED_JOBS="${job_id}, ${FAILED_JOBS}"
-                    ${sshcmd} "mv ${sj} ${sj}.failed"
+                    retry_ssh "mv ${sj} ${sj}.failed"
                 else
                     echo; echo "Job ${jobid} was completed"
-                    ${sshcmd} "mv ${sj} ${sj}.completed"
+                    retry_ssh "mv ${sj} ${sj}.completed"
                     case_dir=$(dirname ${sj} | sed "s|${PWD}/||g")
                 fi
             fi
@@ -150,30 +169,19 @@ while true; do
             get_pbs_job_status
             if [[ "${job_status}" == "C" || -z "${job_status}" ]]; then
                 echo "Job ${jobid} was completed"
-                ${sshcmd} "mv ${sj} ${sj}.completed"
+                retry_ssh "mv ${sj} ${sj}.completed"
                 case_dir=$(dirname ${sj} | sed "s|${PWD}/||g")
             fi
         fi
         sleep 0.5
     done
     sleep 30
-    ssh_retries=10
-    ssh_retry_delay=60
-    while true; do
-        submitted_jobs=$(${sshcmd} find ${resource_jobdir} -name job_id.submitted)
-        if [[ $? -eq 0 ]]; then
-            break
-        fi
-        ssh_retries=$((ssh_retries - 1))
-        if [[ ${ssh_retries} -le 0 ]]; then
-            echo "ERROR: Unable to obtain job status through SSH. Exiting workflow."
-            ./cancel.sh
-            exit 1
-        fi
-        echo "WARNING: Failed command -- ${sshcmd} find ${resource_jobdir} -name job_id.submitted"
-        echo "Retrying in ${ssh_retry_delay} seconds... (${ssh_retries} retries remaining)"
-        sleep ${ssh_retry_delay}
-    done
+    submitted_jobs=$(retry_ssh find ${resource_jobdir} -name job_id.submitted)
+    if [[ $? -ne 0 ]]; then
+        echo "ERROR: Unable to obtain job status through SSH. Exiting workflow."
+        ./cancel.sh
+        exit 1
+    fi
 done
 kill ${simulation_executor_metering_pid}
 # Metering
@@ -211,7 +219,7 @@ echo; echo; echo "WAITING FOR 3DCS MERGE JOBS TO COMPLETE"
 source resources/002_merge_executor/inputs.sh
 export sshcmd="ssh -o StrictHostKeyChecking=no ${resource_publicIp}"
 
-export jobid=$(${sshcmd} cat ${resource_jobdir}/job_id.submitted)
+export jobid=$(retry_ssh cat ${resource_jobdir}/job_id.submitted)
 wait_job
 # Metering
 ssh -A -o StrictHostKeyChecking=no ${resource_publicIp} rsync -avz ${resource_jobdir}/usage/ ${metering_user}@${metering_ip}:~/.3dcs/usage-pending  >> metering.out 2>&1
