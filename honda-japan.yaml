@@ -257,7 +257,7 @@ jobs:
         with:
           resource: ${{ inputs.resource }}
           shebang: '#!/bin/bash'
-          rundir: ${PWD}
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_1
           use_existing_script: true
           script_path: ./run_case.sh
           define_cleanup_script: true
@@ -285,7 +285,7 @@ jobs:
         with:
           resource: ${{ inputs.resource }}
           shebang: '#!/bin/bash'
-          rundir: ${PWD}
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_2
           use_existing_script: true
           script_path: ./run_case.sh
           define_cleanup_script: true
