@@ -130,7 +130,6 @@ jobs:
           export dcs_version="${{ inputs.dcs.version }}"
           export dcs_analysis_type="${{ inputs.dcs.analysis_type }}"
           export dcs_bucket_uri="${{ inputs.dcs.bucket.uri }}"
-          export dcs_bucket_uri="${{ inputs.dcs.bucket.uri }}"
           export dcs_model_directory="${{ inputs.dcs.model_directory }}"
           export dcs_output_directory="${{ inputs.dcs.output_directory }}"
           export dcs_num_seeds="${{ inputs.dcs.num_seeds }}"
@@ -222,7 +221,7 @@ jobs:
               echo "$(date) INFO: Preparing directory for job ${nj}"
               job_dir=job_dir_${nj}
               mkdir -p ${job_dir}
-              echo "${job_dir}=${PWD}/${job_dir}" >> $OUTPUTS
+              echo "${job_dir}=${PWD}/${job_dir}" | tee -a $OUTPUTS
 
               echo '#!/bin/bash' > ${job_dir}/cancel.sh
               chmod +x ${job_dir}/cancel.sh
@@ -235,7 +234,7 @@ jobs:
 
               cat scripts/${dcs_analysis_type}.sh >> ${job_dir}/run_case.sh
               cat scripts/activate_monitoring.sh >> ${job_dir}/run_case.sh
-              cat scrtips/run_dcs.sh >> ${job_dir}/run_case.sh
+              cat scripts/run_dcs.sh >> ${job_dir}/run_case.sh
               cat scripts/plot_monitoring.sh >> ${job_dir}/run_case.sh
               cat scripts/transfer_outputs.sh >> ${job_dir}/run_case.sh
 
