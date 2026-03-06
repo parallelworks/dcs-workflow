@@ -110,6 +110,7 @@ jobs:
           # List all downloaded file
           find . -mindepth 1 > downloaded_files.txt
 
+          cd ..
           mv tmp-data-transfer/*  .
           rmdir tmp-data-transfer
 
