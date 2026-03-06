@@ -91,7 +91,7 @@ jobs:
           # Process WTX file to adapt the paths to the files
           retries=5
           while true; do
-              python3 ./scripts/adapt_wtx_paths.py ${dcs_model_file} ${fea_dir}
+              python3 ${PW_PARENT_JOB_DIR}/scripts/adapt_wtx_paths.py ${dcs_model_file} ${fea_dir}
               exit_code=$?
               if [ ${exit_code} -ne 0 ]; then
                 retries=$((retries-1))
