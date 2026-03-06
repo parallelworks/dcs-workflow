@@ -4,8 +4,7 @@
 mkdir tmp-data-transfer
 cd tmp-data-transfer
 
-# dcs_model_directory can end with or without /
-aws s3 sync ${BUCKET_URI}/${dcs_model_directory} . --cli-read-timeout 60
+pw buckets cp -r ${BUCKET_URI}/${dcs_model_directory} .
 
 # User aws s3 cp --recursive ../test ${BUCKET_URI}/path/to/dir/test to transfer to the bucket
 

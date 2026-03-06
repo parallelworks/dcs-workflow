@@ -1,30 +1,304 @@
 permissions:
   - '*'
+env:
+  MAX_JOBS: '2'
 jobs:
-  main:
+  local_preprocessing:
     steps:
-      - name: Main
-        run: bash main.sh > logs/main/step_0/logs.out 2>&1 
-        cleanup: |
-          touch COMPLETED
-          source resources/001_simulation_executor/inputs.sh
-          timeout 180 bash cancel.sh  || true
-          exit 0
-  stream:
-    steps:
-      - name: Stream Logs
-        early-cancel: any-job-failed
-        run: bash stream.sh > logs/stream/step_0/logs.out 2>&1 
 
-  estimate_end_time:
-    steps:
-      - name: Estimate End Time
-        early-cancel: any-job-failed
-        run: bash estimate_end_time.sh > logs/estimate_end_time/step_0/logs.out 2>&1 
-        cleanup: |
-          bash cancel_stream.sh || true
-          exit 0
+      - name: Sanity Checks
+        run: |
+          source /etc/profile.d/parallelworks.sh
+          source /etc/profile.d/parallelworks-env.sh
+          source /pw/.miniconda3/etc/profile.d/conda.sh
 
+          python3 scripts/get_group_allocation_balance.py ${{ inputs.run_hours_3dcs_group }} ${{ inputs.org_name }}
+          if [ $? -ne 0 ]; then
+              echo "$(date) ERROR: No 3DCS balance is available. Exiting workflow." >&2
+              exit 1
+          fi
+
+  remote_preprocessing:
+    working-directory: ${{ inputs.rundir }}
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - name: Checkout
+        uses: parallelworks/checkout
+        with:
+          repo: https://github.com/parallelworks/dcs-workflow.git
+          branch: main
+
+      - name: Sanity Checks
+        run: |
+          if [[ "${{ inputs.dcs.output_directory }}" == "${{ inputs.dcs.model_directory }}" || "${{ inputs.dcs.output_directory }}" == "${{ inputs.dcs.model_directory }}/"* ]]; then
+              echo "$(date) ERROR: Output directory ${{ inputs.dcs.output_directory }} is a subdirectory of model directory ${{ inputs.dcs.model_directory }}. Exiting workflow" >&2
+              exit 1
+          fi
+
+          # Check if file is provided as an argument
+          if ! [ -f "dcs_environment/${{ inputs.dcs.version }}.sh" ]; then
+              echo "$(date) ERROR: Missing file dcs_environment/${{ inputs.dcs.version }}.sh required to load and run 3DCS. Exiting workflow." >&2
+              exit 1
+          fi
+
+      - name: Transfer and Process Input Files
+        run: |
+
+          mkdir tmp-data-transfer
+          cd tmp-data-transfer
+
+          pw buckets cp -r ${{ inputs.dcs.bucket.uri }}/${{ inputs.dcs.model_directory }} .
+
+          # Find all files ending in ".wtx" in the current directory, excluding subdirectories
+          export dcs_model_file=$(find . -type f -name "*.wtx")
+
+          # Check if dcs_model_file is empty
+          if [ -z "$dcs_model_file" ]; then
+              echo "$(date) ERROR: No '.wtx' files found. Exiting workflow" >&2
+              exit 1
+          fi
+
+          echo "dcs_model_file=${dcs_model_file}" >> $OUTPUTS
+
+          # Count the number of files found
+          file_count=$(echo "$dcs_model_file" | wc -l)
+
+          # Check if only one file ending in ".wtx" is found
+          if [ "$file_count" -eq 1 ]; then
+              echo "Found file ${dcs_model_file}"
+          else
+              echo "$(date) ERROR: Found $file_count '.wtx' files. Expected only one. Exiting workflow" >&2
+              exit 1
+          fi
+
+          # Get the count of directories in the current directory
+          dir_count=$(ls -d */ | wc -l)
+
+          # If there's only one directory
+          if [ "$dir_count" -eq 1 ]; then
+              # Get the name of the directory
+              fea_dir=$(ls -d */ | head -n 1)
+              export fea_dir=${fea_dir%/}  # Remove trailing slash
+              echo "Directory found: $fea_dir"
+          else
+              # If no directory or multiple directories exist
+              echo "Error: Either no FEA directory found or multiple directories exist." >&2
+              exit 1
+          fi
+
+          # Process WTX file to adapt the paths to the files
+          retries=5
+          while true; do
+              python3 ${{ inputs.rundir }}/scripts/adapt_wtx_paths.py ${dcs_model_file} ${fea_dir}
+              exit_code=$?
+              if [ ${exit_code} -ne 0 ]; then
+                retries=$((retries-1))
+                if [ ${retries} -gt 0 ]; then
+                    sleep 10
+                else
+                    echo
+                    echo "$(date) ERROR: Failed to process WTX file with adapt_wtx_paths.py"  >&2
+                    exit 1
+                fi
+              else
+                break
+              fi
+          done
+
+          # List all downloaded file
+          find . -mindepth 1 > downloaded_files.txt
+
+          mv tmp-data-transfer/*  .
+          rmdir tmp-data-transfer
+
+      - name: General Preprocessing
+        run: |
+
+          source dcs_environment/${dcs_version}.sh 
+          sudo chown -R ${USER}:pwuser ${WINEPREFIX}
+
+          mkdir ./usage
+          mkdir ./usage_completed
+
+          cat <<'EOF' >> inputs.sh
+          export PATH=$HOME/pw:$PATH
+          export dcs_model_file="${{ needs.remote_preprocessing.outputs.dcs_model_file }}"
+          export dcs_dry_run="${{ inputs.dcs.dry_run }}"
+          export dcs_version="${{ inputs.dcs.version }}"
+          export dcs_analysis_type="${{ inputs.dcs.analysis_type }}"
+          export dcs_bucket_uri="${{ inputs.dcs.bucket.uri }}"
+          export dcs_bucket_uri="${{ inputs.dcs.bucket.uri }}"
+          export dcs_model_directory="${{ inputs.dcs.model_directory }}"
+          export dcs_output_directory="${{ inputs.dcs.output_directory }}"
+          export dcs_num_seeds="${{ inputs.dcs.num_seeds }}"
+          export dcs_concurrency="${{ inputs.dcs.concurrency }}"
+          export dcs_thread="${{ inputs.dcs.thread }}"
+          export metering_user="${{ inputs.metering_user }}"
+          export metering_ip="${{ inputs.metering_ip }}"
+          export run_hours_3dcs_group="${{ inputs.run_hours_3dcs_group }}"
+          export org_name="${{ inputs.org_name }}"
+          export monitoring_conda_dir="${{ inputs.monitoring_conda_dir }}"
+          export monitoring_conda_env="${{ inputs.monitoring_conda_env }}"
+          EOF
+          echo "export PW_PARENT_JOB_DIR=${PW_PARENT_JOB_DIR}"
+
+          echo "$(date) INFO: Inputs file"
+          cat inputs.sh
+
+      - name: Installing Python Dependencies for CPU and Memory Monitoring
+        run: |
+          source inputs.sh
+
+          install_miniconda() {
+              local install_dir=$1
+              local conda_repo="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+              local ID="${RANDOM}-$(date +%s)" # This script may run at the same time!
+              echo "Installing Miniconda to ${install_dir}"
+              wget --no-check-certificate "${conda_repo}" -O "/tmp/miniconda-${ID}.sh" > "/tmp/miniconda_wget-${ID}.out" 2>&1
+              rm -rf "${install_dir}"
+              mkdir -p "$(dirname "${install_dir}")"
+              bash "/tmp/miniconda-${ID}.sh" -b -p "${install_dir}" > "/tmp/miniconda_sh-${ID}.out" 2>&1
+          }
+
+          create_conda_env_from_yaml() {
+              local CONDA_DIR=$1
+              local CONDA_ENV=$2
+              local CONDA_YAML=$3
+              local CONDA_SH="${CONDA_DIR}/etc/profile.d/conda.sh"
+
+              # Remove name/prefix fields and empty lines so conda env update accepts the file
+              sed -i -e 's/name.*$//' -e 's/prefix.*$//' -e '/^$/d' "${CONDA_YAML}"
+
+              if [ ! -d "${CONDA_DIR}" ]; then
+                  echo "Conda directory <${CONDA_DIR}> not found. Installing Conda..."
+                  install_miniconda "${CONDA_DIR}"
+              fi
+
+              echo "Sourcing Conda: ${CONDA_SH}"
+              source "${CONDA_SH}"
+
+              if conda env list | grep -q "^${CONDA_ENV} "; then
+                  echo "Conda environment <${CONDA_ENV}> already exists. Skipping installation."
+              else
+                  echo "Conda environment <${CONDA_ENV}> not found. Creating from <${CONDA_YAML}>..."
+                  conda env update -n "${CONDA_ENV}" -q -f "${CONDA_YAML}" || {
+                      echo "ERROR: Failed to create conda environment <${CONDA_ENV}>. Exiting."
+                      exit 1
+                  }
+              fi
+
+              conda activate "${CONDA_ENV}"
+          }
+
+
+          create_conda_env_from_yaml ${monitoring_conda_dir} ${monitoring_conda_env} scripts/cpu_and_memory_usage_requirements.yaml
+
+      - name: Dry Run
+        if: ${{ inputs.dcs.dry_run == true }}
+        run: |
+          echo "$(date) INFO: Running the workflow in dry run mode"
+          echo > scripts/activate_monitoring.sh
+          echo > scripts/plot_monitoring.sh
+          echo > scripts/activate_monitoring.sh
+          mv scripts/dry_run.sh scripts/run_dcs.sh
+
+
+      - name: Create Job Scripts
+        run: |
+          set -x
+
+          source inputs.sh
+
+          if [ ${dcs_concurrency} -gt ${MAX_JOBS} ]; then
+            echo "$(date) ERROR: Selected number of jobs is greater than maximum number of jobs. Exiting workflow."
+            exit 1
+          fi
+
+          for nj in $(seq 1 ${MAX_JOBS}); do
+            if [ ${nj} -le ${dcs_concurrency} ]; then
+              echo "$(date) INFO: Preparing directory for job ${nj}"
+              job_dir=job_dir_${nj}
+              mkdir -p ${job_dir}
+              echo "${job_dir}=${PWD}/${job_dir}" >> $OUTPUTS
+
+              echo '#!/bin/bash' > ${job_dir}/cancel.sh
+              chmod +x ${job_dir}/cancel.sh
+
+              cat inputs.sh >> ${job_dir}/run_case.sh
+              echo "export case_index=${nj}" >> ${job_dir}/run_case.sh
+
+              cat dcs_environment/${dcs_version}.sh >> ${job_dir}/run_case.sh
+              echo >> ${job_dir}/run_case.sh
+
+              cat scripts/${dcs_analysis_type}.sh >> ${job_dir}/run_case.sh
+              cat scripts/activate_monitoring.sh >> ${job_dir}/run_case.sh
+              cat scrtips/run_dcs.sh >> ${job_dir}/run_case.sh
+              cat scripts/plot_monitoring.sh >> ${job_dir}/run_case.sh
+              cat scripts/transfer_outputs.sh >> ${job_dir}/run_case.sh
+
+              echo "run_job_${nj}=true" | tee -a $OUTPUTS
+            else
+              echo "run_job_${nj}=false" | tee -a $OUTPUTS
+            fi
+          done
+
+
+  job_1:
+    if: ${{ needs.preprocessing.outputs.run_job_1 == "true" }}
+    working-directory: ${{ needs.preprocessing.outputs.job_dir_1 }}
+    needs:
+      - preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PWD}
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_2:
+    if: ${{ needs.preprocessing.outputs.run_job_2 == "true" }}
+    working-directory: ${{ needs.preprocessing.outputs.job_dir_2 }}
+    needs:
+      - preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PWD}
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
 
 'on':
   execute:
@@ -49,6 +323,21 @@ jobs:
         type: string
         default: honda
         hidden: true
+      monitoring_conda_dir:
+        label: PW Conda Directory
+        type: string
+        default: /dcs/pw/miniconda
+        hidden: true
+      monitoring_conda_env:
+        label: PW Conda Environment
+        type: string
+        default: psutil
+        hidden: true
+      resource:
+        type: compute-clusters
+        label: Service host
+        include-workspace: false
+        tooltip: Resource to host the service
       dcs:
         type: group
         label: 3DCS Options
@@ -80,10 +369,10 @@ jobs:
                 label: Monte Carlo Simulation
               - value: sensitivity
                 label: Contributor Analysis
-          bucket_id:
-            label: Bucket ID or namespace
-            type: string
-            tooltip: Type in the bucket ID string or namespace in the format [bucket-owner]/[bucket-name]
+          bucket:
+            label: Bucket
+            type: bucket
+            tooltip: Select the storage bucket used to download input files and upload output files.
           model_directory:
             label: Model Path
             type: string
@@ -115,84 +404,30 @@ jobs:
             max: 64
             default: 1
             tooltip: Number of threads used to run the simulation. Be aware that N threads require more than N times the memory needed for a single thread.
-
-      pwrl_001_simulation_executor:
+      slurm:
         type: group
-        label: Simulation Executor
+        label: SLURM Directives
         items:
-          monitoring_conda_dir:
-            label: PW Conda Directory
-            type: string
-            default: /dcs/pw/miniconda
+          is_disabled:
+            type: boolean
             hidden: true
-          monitoring_conda_env:
-            label: PW Conda Environment
-            type: string
-            default: psutil
-            hidden: true
-          resource:
-            label: Resource
-            type: compute-clusters
-            tooltip: Resource to run the simulation task
-            include-workspace: false
-          jobschedulertype:
-            label: Select Controller, SLURM Partition or PBS Queue
-            type: string
-            default: SLURM
-            hidden: true
-          _sch__dd_partition_e_:
+            default: false
+            label: Is SLURM disabled?
+          partition:
             type: slurm-partitions
             label: SLURM partition
             optional: true
-            tooltip: Partition to submit the job. Leave empty to let SLURM pick the optimal option.
-            resource: ${{ inputs.pwrl_001_simulation_executor.resource }}
-          _sch__dd_time_e_:
+            resource: ${{ inputs.resource }}
+            tooltip: Select a partition from the drop down menu.
+          time:
             label: Walltime
             type: string
             default: '999:00:00'
-            tooltip: Maximum walltime per job
+            tooltip: '--time= SLURM directive to set the maximum wall-clock time limit for the job'
           scheduler_directives:
-            label: Scheduler directives
-            type: string
-            default: '--exclusive'
-            tooltip: e.g. --mem=1000;--gpus-per-node=1 - Use the semicolon character ; to separate parameters. Do not include the SBATCH keyword.
-      pwrl_002_merge_executor:
-        type: group
-        label: Merge Executor
-        items:
-          monitoring_conda_dir:
-            label: PW Conda Directory
-            type: string
-            default: /dcs/pw/miniconda
-            hidden: true
-          monitoring_conda_env:
-            label: PW Conda Environment
-            type: string
-            default: psutil
-            hidden: true
-          resource:
-            label: Resource
-            type: compute-clusters
-            tooltip: Resource to run the simulation task
-            include-workspace: false
-          jobschedulertype:
-            label: Select Controller, SLURM Partition or PBS Queue
-            type: string
-            default: SLURM
-            hidden: true
-          _sch__dd_partition_e_:
-            type: slurm-partitions
-            label: SLURM partition
+            type: editor
             optional: true
-            tooltip: Partition to submit the job. Leave empty to let SLURM pick the optimal option.
-            resource: ${{ inputs.pwrl_002_merge_executor.resource }}
-          _sch__dd_time_e_:
-            label: Walltime
-            type: string
-            default: '999:00:00'
-            tooltip: Maximum walltime per job
-          scheduler_directives:
-            label: Scheduler directives
-            type: string
-            default: '--exclusive'
-            tooltip: e.g. --mem=1000;--gpus-per-node=1 - Use the semicolon character ; to separate parameters. Do not include the SBATCH keyword.
+            tooltip: |
+              Type in additional scheduler directives.
+            default: |
+              #SBATCH --exclusive

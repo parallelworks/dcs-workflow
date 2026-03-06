@@ -2,17 +2,6 @@
 source inputs.sh
 chmod +x cancel.sh
 
-if [[ "${dcs_output_directory}" == "${dcs_model_directory}" || "${dcs_output_directory}" == "${dcs_model_directory}/"* ]]; then
-    echo "Error: Output directory is a subdirectory of model directory." >&2
-    exit 1
-fi
-
-# Check if file is provided as an argument
-if ! [ -f "dcs_environment/${dcs_version}.sh" ]; then
-    echo "Error: Missing file dcs_environment/${dcs_version}.sh required to load and run 3DCS. Exiting workflow."
-    exit 1
-fi
-
 
 # Use the resource wrapper
 source /etc/profile.d/parallelworks.sh
@@ -38,7 +27,7 @@ fi
 
 # Check balance
 echo; echo "3DCS allocation balance"
-python3 get_group_allocation_balance.py ${run_hours_3dcs_group} ${org_name}
+python3 utils/get_group_allocation_balance.py ${run_hours_3dcs_group} ${org_name}
 
 
 if [ $? -ne 0 ]; then
@@ -101,6 +90,8 @@ scp bucket_credentials ${resource_publicIp}:${resource_jobdir}/bucket_credential
 ./reload_bucket_credentials.sh &> reload_bucket_credentials.log &
 reload_bucket_credential_pid=$!
 echo "kill ${reload_bucket_credential_pid} || true # bucket credentials" >> cancel.sh
+
+# HERE
 
 echo; echo; echo "PREPARING AND SUBMITTING 3DCS RUN JOBS"
 single_cluster_rsync_exec resources/001_simulation_executor/cluster_rsync_exec.sh
