@@ -60,7 +60,7 @@ jobs:
               exit 1
           fi
 
-          echo "dcs_model_file=${dcs_model_file}" >> $OUTPUTS
+          echo "dcs_model_file=${PW_PARENT_JOB_DIR}/${dcs_model_file}" >> $OUTPUTS
 
           # Count the number of files found
           file_count=$(echo "$dcs_model_file" | wc -l)
