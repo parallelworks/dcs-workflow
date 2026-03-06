@@ -27,7 +27,7 @@ jobs:
         uses: parallelworks/checkout
         with:
           repo: https://github.com/parallelworks/dcs-workflow.git
-          branch: main
+          branch: v4
 
       - name: Sanity Checks
         run: |
