@@ -221,7 +221,6 @@ jobs:
               echo "$(date) INFO: Preparing directory for job ${nj}"
               job_dir=job_dir_${nj}
               mkdir -p ${job_dir}
-              echo "${job_dir}=${PWD}/${job_dir}" | tee -a $OUTPUTS
 
               echo '#!/bin/bash' > ${job_dir}/cancel.sh
               chmod +x ${job_dir}/cancel.sh
@@ -247,7 +246,7 @@ jobs:
 
   job_1:
     if: ${{ needs.remote_preprocessing.outputs.run_job_1 == "true" }}
-    working-directory: ${{ needs.remote_preprocessing.outputs.job_dir_1 }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_1
     needs:
       - remote_preprocessing
     ssh:
@@ -275,7 +274,7 @@ jobs:
 
   job_2:
     if: ${{ needs.remote_preprocessing.outputs.run_job_2 == "true" }}
-    working-directory: ${{ needs.remote_preprocessing.outputs.job_dir_2 }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_2
     needs:
       - remote_preprocessing
     ssh:
