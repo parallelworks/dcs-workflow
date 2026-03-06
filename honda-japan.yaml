@@ -142,7 +142,9 @@ jobs:
           export monitoring_conda_dir="${{ inputs.monitoring_conda_dir }}"
           export monitoring_conda_env="${{ inputs.monitoring_conda_env }}"
           EOF
-          echo "export PW_PARENT_JOB_DIR=${PW_PARENT_JOB_DIR}"
+          echo "export PW_PARENT_JOB_DIR=${PW_PARENT_JOB_DIR}" >> inputs.sh
+          echo "export PW_WORKFLOW_NAME=${PW_WORKFLOW_NAME}" >> inputs.sh
+          echo "export PW_JOB_NUMBER=${PW_JOB_NUMBER}" >> inputs.sh
 
           echo "$(date) INFO: Inputs file"
           cat inputs.sh
