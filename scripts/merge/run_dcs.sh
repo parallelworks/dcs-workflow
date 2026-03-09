@@ -16,6 +16,13 @@ chmod +x metering.sh
 metering_pid=$!
 echo "kill ${metering_pid} || true # Metering" >> cancel.sh
 
+# Stream logs
+log_path="TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').txt"
+touch ${log_path}
+tail -f ${log_path} &
+tail_pid=$!
+echop "kill ${tail_pid} || true # Tail logs" >> cancel.sh
+
 # Run 3dcs
 SECONDS=0
 eval "${dcs_run}"  macroScript.txt
