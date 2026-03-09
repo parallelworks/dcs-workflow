@@ -24,6 +24,7 @@ jobs:
       - local_preprocessing
     steps:
       - name: Usage Metering
+        early-cancel: any-job-failed
         run: |
           #!/bin/bash
           mkdir -p usage
