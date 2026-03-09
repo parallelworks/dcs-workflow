@@ -19,7 +19,22 @@ jobs:
               exit 1
           fi
 
+  usage_metering:
+    needs:
+      - local_preprocessing
+    steps:
+      #!/bin/bash
+      mkdir -p usage
+      while true; do
+          sleep 60
+          echo "$(date) INFO: Transferring usage data" 
+          rsync -avz --delete ${{ inputs.resource.ip }}:${{ inputs.rundir }}/usage/ usage
+          rsync -avz ${PWD}/usage/ ${{ inputs.metering_user }}@${{ inputs.metering_ip }}:~/.3dcs/usage-pending
+      done
+
   remote_preprocessing:
+    needs:
+      - local_preprocessing
     working-directory: ${{ inputs.rundir }}
     ssh:
       remoteHost: ${{ inputs.resource.ip }}
@@ -292,16 +307,15 @@ jobs:
           echo; echo
           echo "$(date) INFO: Calculating completion time estimates"
 
-          log_files=$(ls -d ./job_dir_*/${log_path})
-          log_files=$(echo ${log_files} | tr ' ' ',')
-
-          echo "$(date) INFO: Log files:"
-          echo ${log_files} | tr ',' '\n'
-
           while true; do
-              echo; echo; echo "$(date)"
-              python3 scripts/estimate_end_time.py ${log_files}
-              sleep 120
+            log_files=$(ls -d ./job_dir_*/${log_path})
+            log_files=$(echo ${log_files} | tr ' ' ',')
+
+            echo "$(date) INFO: Log files:"
+            echo ${log_files} | tr ',' '\n'
+
+            python3 scripts/estimate_end_time.py ${log_files}
+            sleep 120
           done
           exit 0
 
