@@ -205,6 +205,7 @@ jobs:
           echo > scripts/plot_monitoring.sh
           echo > scripts/activate_monitoring.sh
           mv scripts/dry_run.sh scripts/run_dcs.sh
+          mv scripts/merge/dry_run.sh scripts/merge/dry_run.sh
 
 
       - name: Create Job Scripts
@@ -301,6 +302,56 @@ jobs:
             time: ${{ inputs.slurm.time }}
           pbs:
             is_disabled: true
+
+  merge:
+    if: ${{ always }}
+    needs:
+      - job_1
+      - job_2
+    working-directory: ${{ inputs.rundir }}
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - name: Create Merge Script
+        early-cancel: any-job-failed
+        run: |
+          set -x 
+          source inputs.sh
+          echo "$(date) INFO: Preparing merge job"
+          mkdir -p merge
+
+          echo '#!/bin/bash' > merge/cancel.sh
+          chmod +x merge/cancel.sh
+
+          cat inputs.sh > merge/merge.sh
+          cat dcs_environment/${dcs_version}.sh >> merge/merge.sh
+          cat scripts/merge/transfer_inputs.sh >> merge/merge.sh
+          cat scripts/merge/${dcs_analysis_type}.sh >> merge/merge.sh
+          cat scripts/merge/run_dcs.sh >> merge/merge.sh
+          cat scripts/merge/clean_job_directory.sh >> merge/merge.sh
+          cat scripts/merge/transfer_outputs.sh >> merge/merge.sh
+ 
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/merge
+          use_existing_script: true
+          script_path: ./merge.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
 
 'on':
   execute:

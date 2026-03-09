@@ -6,7 +6,7 @@
 cat >> metering.sh <<HERE
 #!/bin/bash
 while true; do
-    date >> ${resource_jobdir}/usage/$(hostname)-${job_number}-merge
+    date >> ${PW_PARENT_JOB_DIR}/usage/$(hostname)-${PW_JOB_NUMBER}-merge
     sleep \$((RANDOM % 30 + 30))
 done
 HERE
@@ -14,12 +14,13 @@ HERE
 chmod +x metering.sh
 ./metering.sh &
 metering_pid=$!
+echo "kill ${metering_pid} || true # Metering" >> cancel.sh
 
 # Run 3dcs
 SECONDS=0
 eval "${dcs_run}"  macroScript.txt
 kill ${metering_pid}
-mv ${resource_jobdir}/usage/$(hostname)-${job_number}-merge ${resource_jobdir}/usage_completed/$(hostname)-${job_number}-merge
+mv ${PW_PARENT_JOB_DIR}/usage/$(hostname)-${PW_JOB_NUMBER}-merge ${PW_PARENT_JOB_DIR}/usage_completed/$(hostname)-${PW_JOB_NUMBER}-merge
 
 
 # Results is own by root
