@@ -300,9 +300,10 @@ jobs:
 
           while true; do
               echo; echo; echo "$(date)"
-              python3 scripts/estimate_end_time.py ${log_files}"
+              python3 scripts/estimate_end_time.py ${log_files}
               sleep 120
           done
+          exit 0
 
   job_1:
     if: ${{ needs.remote_preprocessing.outputs.run_job_1 == "true" }}
