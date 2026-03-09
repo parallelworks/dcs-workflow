@@ -1,7 +1,7 @@
 permissions:
   - '*'
 env:
-  MAX_JOBS: '2'
+  MAX_JOBS: '20'
 jobs:
 
   local_preprocessing:
@@ -377,6 +377,511 @@ jobs:
           pbs:
             is_disabled: true
 
+  job_3:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_3 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_3
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_3
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_4:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_4 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_4
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_4
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_5:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_5 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_5
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_5
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_6:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_6 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_6
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_6
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_7:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_7 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_7
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_7
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_8:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_8 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_8
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_8
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_9:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_9 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_9
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_9
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_10:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_10 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_10
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_10
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_11:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_11 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_11
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_11
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_12:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_12 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_12
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_12
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_13:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_13 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_13
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_13
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_14:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_14 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_14
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_14
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_15:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_15 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_15
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_15
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_16:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_16 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_16
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_16
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_17:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_17 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_17
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_17
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_18:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_18 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_18
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_18
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_19:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_19 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_19
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_19
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+  job_20:
+    if: ${{ needs.remote_preprocessing.outputs.run_job_20 == "true" }}
+    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_20
+    needs:
+      - remote_preprocessing
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - uses: marketplace/script_submitter/v3.5
+        early-cancel: any-job-failed
+        with:
+          resource: ${{ inputs.resource }}
+          shebang: '#!/bin/bash'
+          rundir: ${PW_PARENT_JOB_DIR}/job_dir_20
+          use_existing_script: true
+          script_path: ./run_case.sh
+          define_cleanup_script: true
+          cleanup_script_path: ./cancel.sh
+          scheduler: true
+          use_scheduler_agent: false
+          slurm:
+            is_disabled: false
+            partition: ${{ inputs.slurm.partition }}
+            scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
+            time: ${{ inputs.slurm.time }}
+          pbs:
+            is_disabled: true
+
+
   merge:
     if: ${{ always }}
     needs:
@@ -439,6 +944,12 @@ jobs:
             time: ${{ inputs.slurm.time }}
           pbs:
             is_disabled: true
+
+      - name: Cancel Usage Metering
+        uses: parallelworks/cancel-jobs
+        with:
+          jobs:
+            - usage_metering
 
 
 'on':
@@ -535,7 +1046,7 @@ jobs:
             label: Number of Workers
             type: number
             min: 1
-            max: 50
+            max: 20
             default: 1
             tooltip: Number of workers used to run the simulations. A SLURM job is submitted for each worker.
           thread:
