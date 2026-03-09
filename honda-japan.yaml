@@ -4,22 +4,6 @@ env:
   MAX_JOBS: '2'
 jobs:
 
-  stream_logs:
-    steps:
-
-      - name: Sanity Checks
-        run: |
-          source /etc/profile.d/parallelworks.sh
-          source /etc/profile.d/parallelworks-env.sh
-          source /pw/.miniconda3/etc/profile.d/conda.sh
-
-          python3 scripts/get_group_allocation_balance.py ${{ inputs.run_hours_3dcs_group }} ${{ inputs.org_name }}
-          if [ $? -ne 0 ]; then
-              echo "$(date) ERROR: No 3DCS balance is available. Exiting workflow." >&2
-              exit 1
-          fi
-
-
   local_preprocessing:
     steps:
 
@@ -250,6 +234,8 @@ jobs:
 
               cat dcs_environment/${dcs_version}.sh >> ${job_dir}/run_case.sh
               echo >> ${job_dir}/run_case.sh
+              echo "touch job.started" >> ${job_dir}/run_case.sh
+              echo >> ${job_dir}/run_case.sh
 
               cat scripts/${dcs_analysis_type}.sh >> ${job_dir}/run_case.sh
               cat scripts/activate_monitoring.sh >> ${job_dir}/run_case.sh
@@ -263,6 +249,60 @@ jobs:
             fi
           done
 
+
+  estimate_end_time:
+    needs:
+      - remote_preprocessing
+    working-directory: ${{ inputs.rundir }}
+    ssh:
+      remoteHost: ${{ inputs.resource.ip }}
+    steps:
+      - name: Estimate End Time
+        run: |
+
+          # Source the inputs file
+          source inputs.sh
+
+          if [ ${dcs_thread} -eq 1 ]; then
+              echo "$(date) INFO: Number of threads must be larger than 1 to enable estimates"
+              echo "$(date) INFO: Exiting job..."
+          fi 
+
+          log_path="TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').txt"
+
+          wait_for_all_simulations_to_start() {
+              while true; do
+                  n_running_workers=$(ls -d job_dir_*/job.started | wc -l)
+                  if [ $? -ne 0 ]; then
+                      n_running_workers=0
+                  fi
+                  if [ "${n_running_workers}" -lt "${dcs_concurrency}" ]; then
+                      echo "$(date) INFO: ${n_running_workers}/${dcs_concurrency} simulations started"
+                      echo "$(date) INFO: Waiting for all simulations to start..."
+                      sleep 15
+                  else
+                      break
+                  fi
+              done
+          }
+
+          wait_for_all_simulations_to_start
+
+          echo "$(date) INFO: All simulations are started!"
+          echo; echo
+          echo "$(date) INFO: Calculating completion time estimates"
+
+          log_files=$(ls -d ./job_dir_*/${log_path})
+          log_files=$(echo ${log_files} | tr ' ' ',')
+
+          echo "$(date) INFO: Log files:"
+          echo ${log_files} | tr ',' '\n'
+
+          while true; do
+              echo; echo; echo "$(date)"
+              python3 scripts/estimate_end_time.py ${log_files}"
+              sleep 120
+          done
 
   job_1:
     if: ${{ needs.remote_preprocessing.outputs.run_job_1 == "true" }}
@@ -329,6 +369,11 @@ jobs:
     ssh:
       remoteHost: ${{ inputs.resource.ip }}
     steps:
+      - name: Cancel End Time Estimation
+        uses: parallelworks/cancel-jobs
+        with:
+          jobs:
+            - estimate_end_time
       - name: Create Merge Script
         early-cancel: any-job-failed
         run: |
