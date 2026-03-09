@@ -380,6 +380,15 @@ jobs:
         run: |
           set -x 
           source inputs.sh
+
+          # Only run merge if more than one job was submitted
+          if [ ${dcs_concurrency} == 1 ]; then
+            echo "$(date) INFO: 3DCS concurrency is 1. Exiting workflow."
+            echo "run_merge=false" | tee -a $OUTPUTS
+            exit 0
+          fi
+          echo "run_merge=true" | tee -a $OUTPUTS
+
           echo "$(date) INFO: Preparing merge job"
           mkdir -p merge
 
@@ -395,6 +404,7 @@ jobs:
           cat scripts/merge/transfer_outputs.sh >> merge/merge.sh
  
       - uses: marketplace/script_submitter/v3.5
+        if: ${{ needs.merge.outputs.run_merge == "true" }}
         early-cancel: any-job-failed
         with:
           resource: ${{ inputs.resource }}
