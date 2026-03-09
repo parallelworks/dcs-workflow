@@ -331,7 +331,6 @@ jobs:
           cat scripts/merge/clean_job_directory.sh >> merge/merge.sh
           cat scripts/merge/transfer_outputs.sh >> merge/merge.sh
  
-    steps:
       - uses: marketplace/script_submitter/v3.5
         early-cancel: any-job-failed
         with:
