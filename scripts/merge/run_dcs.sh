@@ -21,7 +21,7 @@ log_path="TempData/dcsSimuMacro_SA_log_x64_$(echo ${dcs_version} | tr '.' '_').t
 touch ${log_path}
 tail -f ${log_path} &
 tail_pid=$!
-echop "kill ${tail_pid} || true # Tail logs" >> cancel.sh
+echo "kill ${tail_pid} || true # Tail logs" >> cancel.sh
 
 # Run 3dcs
 SECONDS=0
