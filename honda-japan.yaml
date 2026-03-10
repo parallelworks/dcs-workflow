@@ -48,6 +48,29 @@ jobs:
           repo: https://github.com/parallelworks/dcs-workflow.git
           branch: v4
 
+      - name: Increase SSH Session Limit
+        run: |
+          #!/bin/bash
+          set -euo pipefail
+
+          SSHD_CONFIG="/etc/ssh/sshd_config"
+          MAX_SESSIONS=50
+          MAX_STARTUPS="50:30:200"
+
+          sudo cp "$SSHD_CONFIG" "${SSHD_CONFIG}.bak.$(date +%Y%m%d%H%M%S)"
+          sudo sed -i "s/^#\?MaxSessions.*/MaxSessions ${MAX_SESSIONS}/" "$SSHD_CONFIG"
+          sudo sed -i "s/^#\?MaxStartups.*/MaxStartups ${MAX_STARTUPS}/" "$SSHD_CONFIG"
+
+          sudo sshd -t || {
+              echo "sshd config validation failed. Restoring backup." >&2
+              sudo cp "${SSHD_CONFIG}.bak."* "$SSHD_CONFIG"
+              exit 1
+          }
+          sudo systemctl reload sshd
+
+          echo "SSH limits updated:"
+          sudo grep -E "^MaxSessions|^MaxStartups" "$SSHD_CONFIG"
+
       - name: Sanity Checks
         run: |
           if [[ "${{ inputs.dcs.output_directory }}" == "${{ inputs.dcs.model_directory }}" || "${{ inputs.dcs.output_directory }}" == "${{ inputs.dcs.model_directory }}/"* ]]; then
