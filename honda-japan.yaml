@@ -53,6 +53,13 @@ jobs:
           #!/bin/bash
           set -euo pipefail
 
+          if [ -f "${HOME}/.ssh/sessions_increased" ]; then
+            echo "$(date) INFO: SSH session limit already increased"
+            exit 0
+          fi
+          touch "${HOME}/.ssh/sessions_increased"
+          echo "$(date) INFO: Increasing SSH session limit"
+
           SSHD_CONFIG="/etc/ssh/sshd_config"
           MAX_SESSIONS=50
           MAX_STARTUPS="50:30:200"
