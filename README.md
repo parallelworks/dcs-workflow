@@ -1,23 +1,22 @@
 ## 3DCS Parallel Workflow
-This workflow enables running a 3DCS Monte Carlo or contributor analysis job using multiple workers on a SLURM cluster in the cloud. Here’s how to use it:
+This workflow enables running a 3DCS Monte Carlo or contributor analysis job using multiple workers on a SLURM cluster in the cloud. Here's how to use it:
 
 ### 1. Upload Files
-- Upload your model’s files to a cloud bucket on the platform (see this [link](https://parallelworks.com/docs/storage/transferring-data/obtaining-credentials)).
+- Upload your model's files to a cloud bucket on the platform (see this [link](https://parallelworks.com/docs/storage/transferring-data/obtaining-credentials)).
 
 ### 2. Run the Job
-- Fill in the workflow’s input form.
+- Fill in the workflow's input form.
 - Click the execute button.
 - For parameter descriptions, hover over the help (?) icon next to each parameter's name.
 
 ### 3. Job Execution
-- The job is divided into sub-jobs based on the selected number of workers.
-- Each worker uses the specified number of threads.
+- Before running, the workflow checks that your group has sufficient 3DCS allocation balance.
+- The job is divided into sub-jobs based on the selected number of workers (up to 20).
+- Each worker is submitted as an individual SLURM job and uses the specified number of threads.
 - The simulation runs in the resource defined in the simulation executor section of the input form.
 
 ### 4. Node Utilization
-- The "max workers per node" parameter sets the maximum number of workers per node.
-- To reduce compute costs, estimate the required memory for a single worker and maximize memory utilization by fitting as many workers as possible on a single node.
-- Required memory for N workers is N times the memory for a single worker. However, the required memory for N threads is more than N times the memory for a single thread.
+- The `#SBATCH --exclusive` flag is set by default in the SLURM directives due to issues running multiple 3DCS workers on a single node. This means each worker occupies a full node.
 
 ![Sample Configuration](https://raw.githubusercontent.com/parallelworks/dcs-workflow/main/2-Nodes_4-Workers_2-Threads_Per_Worker_Configuration.png)
 
@@ -33,3 +32,4 @@ This workflow enables running a 3DCS Monte Carlo or contributor analysis job usi
 - 3DCS usage is calculated based on the total number of hours a node uses any number of 3DCS workers.
 - For example, if 2 nodes run a 3DCS job for 10 hours with 3 workers per node and 4 threads per worker, the usage is 2 nodes x 10 hours = 20 hours.
 - To minimize 3DCS license usage, fit as many workers as possible on a single node.
+- Usage data is continuously transferred to the metering server during the run.

@@ -2,7 +2,6 @@ import os
 import sys
 
 wtx_file_path = sys.argv[1]
-fea_dir = sys.argv[2].replace('/', '')
 
 def replace_between_angle_brackets(input_string, replacement):
     """
@@ -27,14 +26,6 @@ def write_lines_to_file(lines, file_path, encoding='utf-8'):
     with open(file_path, 'w', encoding=encoding) as file:
         file.writelines(lines)
 
-def get_search_file_paths(file_paths):
-    """
-    Create search patterns for the file paths.
-
-    :param file_paths: List of file paths.
-    :return: List of search patterns for the file paths.
-    """
-    return [os.path.basename(file_path) for file_path in file_paths]
 
 def read_file_with_encodings(file_path, encodings=['utf-8', 'shift_jis', 'euc-jp', 'iso-2022-jp', 'latin-1']):
     """
@@ -53,20 +44,22 @@ def read_file_with_encodings(file_path, encodings=['utf-8', 'shift_jis', 'euc-jp
             continue
     raise UnicodeDecodeError(f"Unable to decode file {file_path} with any of the provided encodings.")
 
-def process_wtx_file(wtx_file_path, search_file_paths):
+def process_wtx_file(wtx_file_path, file_paths):
     """
     Process the WTX file, replacing text between angle brackets.
 
     :param wtx_file_path: Path to the WTX file.
-    :param search_file_paths: List of search patterns for file paths.
+    :param file_paths: List of relative file paths found in the current directory.
     :return: List of processed lines from the WTX file.
     """
     new_wtx_file_lines = []
     lines, encoding = read_file_with_encodings(wtx_file_path)
     for line in lines:
-        for file_path in search_file_paths:
-            if file_path in line:
-                line = replace_between_angle_brackets(line, '..\\' + fea_dir + '\\' + file_path)
+        for file_path in file_paths:
+            basename = os.path.basename(file_path)
+            if basename in line:
+                win_path = '..\\'  + file_path.replace('/', '\\')
+                line = replace_between_angle_brackets(line, win_path)
         new_wtx_file_lines.append(line)
     return new_wtx_file_lines, encoding
 
@@ -84,9 +77,8 @@ def main():
     wtx_file_path = sys.argv[1]
 
     file_paths = find_all_files_os()
-    search_file_paths = get_search_file_paths(file_paths)
 
-    new_wtx_file_lines, encoding = process_wtx_file(wtx_file_path, search_file_paths)
+    new_wtx_file_lines, encoding = process_wtx_file(wtx_file_path, file_paths)
     write_lines_to_file(new_wtx_file_lines, wtx_file_path, encoding=encoding)
 
 if __name__ == '__main__':

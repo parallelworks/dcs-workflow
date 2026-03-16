@@ -29,25 +29,10 @@ else
 fi
 
 
-# Get the count of directories in the current directory
-dir_count=$(ls -d */ | wc -l)
-
-# If there's only one directory
-if [ "$dir_count" -eq 1 ]; then
-    # Get the name of the directory
-    fea_dir=$(ls -d */ | head -n 1)
-    export fea_dir=${fea_dir%/}  # Remove trailing slash
-    echo "Directory found: $fea_dir"
-else
-    # If no directory or multiple directories exist
-    echo "Error: Either no FEA directory found or multiple directories exist." >&2
-    exit 1
-fi
-
 # Process WTX file to adapt the paths to the files
 retries=5
 while true; do
-    python3 ../adapt_wtx_paths.py ${dcs_model_file} ${fea_dir}
+    python3 ../adapt_wtx_paths.py ${dcs_model_file}
     exit_code=$?
     if [ ${exit_code} -ne 0 ]; then
 	    retries=$((retries-1))
