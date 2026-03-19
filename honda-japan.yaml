@@ -136,9 +136,10 @@ jobs:
 
       - name: General Preprocessing
         run: |
-
+          set -x
           source dcs_environment/${dcs_version}.sh 
           sudo chown -R ${USER}:pwuser ${WINEPREFIX}
+          ls -lat ${WINEPREFIX}
 
           mkdir ./usage
           mkdir ./usage_completed
@@ -350,7 +351,7 @@ jobs:
     ssh:
       remoteHost: ${{ inputs.resource.ip }}
     steps:
-      - uses: marketplace/script_submitter/v3.5
+      - uses: marketplace/script_submitter/v3.6
         early-cancel: any-job-failed
         with:
           resource: ${{ inputs.resource }}
@@ -363,12 +364,12 @@ jobs:
           scheduler: true
           use_scheduler_agent: false
           slurm:
-            is_disabled: false
+            is_enabled: true
             partition: ${{ inputs.slurm.partition }}
             scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
             time: ${{ inputs.slurm.time }}
           pbs:
-            is_disabled: true
+            is_enabled: false
 
   merge:
     if: ${{ always }}
@@ -425,12 +426,12 @@ jobs:
           scheduler: true
           use_scheduler_agent: false
           slurm:
-            is_disabled: false
+            is_enabled: true
             partition: ${{ inputs.slurm.partition }}
             scheduler_directives: ${{ inputs.slurm.scheduler_directives }}
             time: ${{ inputs.slurm.time }}
           pbs:
-            is_disabled: true
+            is_enabled: false
 
       - name: Cancel Usage Metering
         uses: parallelworks/cancel-jobs
@@ -547,11 +548,6 @@ jobs:
         type: group
         label: SLURM Directives
         items:
-          is_disabled:
-            type: boolean
-            hidden: true
-            default: false
-            label: Is SLURM disabled?
           partition:
             type: slurm-partitions
             label: SLURM partition
