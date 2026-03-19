@@ -31,8 +31,10 @@ jobs:
           while true; do
               sleep 60
               echo "$(date) INFO: Transferring usage data" 
+              set -x
               rsync -avz --delete ${{ inputs.resource.ip }}:${{ inputs.rundir }}/usage/ usage
               rsync -avz ${PWD}/usage/ ${{ inputs.metering_user }}@${{ inputs.metering_ip }}:~/.3dcs/usage-pending
+              set +x
           done
 
   remote_preprocessing:
