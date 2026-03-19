@@ -138,8 +138,9 @@ jobs:
         run: |
           set -x
           source dcs_environment/${dcs_version}.sh 
+          ls -latd ${WINEPREFIX}
           sudo chown -R ${USER}:pwuser ${WINEPREFIX}
-          ls -lat ${WINEPREFIX}
+          ls -latd ${WINEPREFIX}
 
           mkdir ./usage
           mkdir ./usage_completed
