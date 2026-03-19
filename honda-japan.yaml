@@ -32,7 +32,7 @@ jobs:
               sleep 60
               echo "$(date) INFO: Transferring usage data" 
               set -x
-              rsync -avz --delete ${{ inputs.resource.ip }}:${{ inputs.rundir }}/usage/ usage
+              rsync -avz --delete ${{ inputs.resource.ip }}:${PW_PARENT_JOB_DIR}/usage/ usage
               rsync -avz ${PWD}/usage/ ${{ inputs.metering_user }}@${{ inputs.metering_ip }}:~/.3dcs/usage-pending
               set +x
           done
@@ -40,7 +40,6 @@ jobs:
   remote_preprocessing:
     needs:
       - local_preprocessing
-    working-directory: ${{ inputs.rundir }}
     ssh:
       remoteHost: ${{ inputs.resource.ip }}
     steps:
@@ -270,7 +269,6 @@ jobs:
   estimate_end_time:
     needs:
       - remote_preprocessing
-    working-directory: ${{ inputs.rundir }}
     ssh:
       remoteHost: ${{ inputs.resource.ip }}
     steps:
@@ -378,7 +376,6 @@ jobs:
     if: ${{ always }}
     needs:
       - workers
-    working-directory: ${{ inputs.rundir }}
     ssh:
       remoteHost: ${{ inputs.resource.ip }}
     steps:
