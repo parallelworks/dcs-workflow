@@ -137,7 +137,7 @@ jobs:
       - name: General Preprocessing
         run: |
           set -x
-          source dcs_environment/${dcs_version}.sh 
+          source dcs_environment/${{ inputs.dcs.version }}.sh 
           ls -latd ${WINEPREFIX}
           sudo chown -R ${USER}:pwuser ${WINEPREFIX}
           ls -latd ${WINEPREFIX}
