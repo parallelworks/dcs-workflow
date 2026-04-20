@@ -39,16 +39,14 @@ LOCK_FILE_PATH = os.path.join(DCS_DIR, 'update-3dcs-usage.lock')
 CUSTOMER_ORG_ID = '63572a4c1129281e00477a0c'
 PW_PLATFORM_HOST = os.environ.get('PW_PLATFORM_HOST')
 PW_API_KEY = os.environ.get('PW_API_KEY')
-CUSTOMER_ORG_NAME = os.environ.get('CUSTOMER_ORG_NAME')
+CUSTOMER_ORG_NAME = 'honda'
+HEADERS = {"Authorization": "Basic {}".format(encode_string_to_base64(PW_API_KEY))}
 
-group_name_to_id_mapping = {}
-HEADERS = {"Authorization": "Basic {}".format(encode_string_to_base64(os.environ['PW_API_KEY']))}
-
-GROUP_NAME: str = '3dcs-run-hours'
-# ORGANIZATION_URL: str = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams?organization={CUSTOMER_ORG_ID}'
-# ORGANIZATION_URL: str = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams'
+GROUP_NAME: str = 'japan-3dcs-run-hours'
+#ORGANIZATION_URL: str = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams?organization={CUSTOMER_ORG_ID}'
+#ORGANIZATION_URL: str = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams'
 ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/organizations/{CUSTOMER_ORG_NAME}/groups'
-
+#ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/organization/{CUSTOMER_ORG_NAME}/groups/{GROUP_NAME}'
 
 CONNECTED_WORKERS = {}
 
@@ -79,23 +77,24 @@ def get_group_info():
 
 def get_allocation_used(group):
     if 'used' in group['allocations']:
-        return group['allocations']['used']['value']
-    return 0    
+        return group['allocations']['used']
+    return 0
 
 def http_put_sync(url, payload):
     response = requests.put(url, json=payload,  headers = HEADERS)
     return response.json()
 
-def update_group_allocation_used(group_id, allocation_used):
-    #logger.info(f'Updating {group_id} used allocation to {allocation_used}')
-    url = f"https://{PW_PLATFORM_HOST}/api/v2/organization/teams/{group_id}"
+def update_group_allocation_used(group_name, allocation_used):
+    #logger.info(f'Updating {group_name} used allocation to {allocation_used}')
+    url = f"https://{PW_PLATFORM_HOST}/api/organizations/{CUSTOMER_ORG_NAME}/groups/{group_name}/allocations"
     payload = {
-        "allocation_used": allocation_used
+        "allocation": float(group_info['allocations']['total']),
+        "allocationUsed": float(allocation_used)
     }
-    return http_put_sync(url, payload)
+    response = requests.patch(url, json=payload, headers=HEADERS)
+    return response.json()
 
 def get_group_id(group_name):
-
     res = requests.get(ORGANIZATION_URL, headers = get_headers())
 
     for group in res.json():
@@ -221,7 +220,7 @@ def process_worker_files(worker_files, allocation_used):
     if cached_usage > 0:
         allocation_used += cached_usage
         logger.info(f'Updating allocation used to {allocation_used}.')
-        update_group_allocation_used(group_id, round(allocation_used,2))
+        update_group_allocation_used(GROUP_NAME, round(allocation_used,2))
     
     return allocation_used
 
