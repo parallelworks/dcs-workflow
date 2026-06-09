@@ -22,8 +22,6 @@ CUSTOMER_ORG_NAME = sys.argv[2]
 PW_PLATFORM_HOST = os.environ.get('PW_PLATFORM_HOST')
 HEADERS = {"Authorization": "Basic {}".format(encode_string_to_base64(os.environ['PW_API_KEY']))}
 # ORGANIZATION_ID = os.environ.get('ORGANIZATION_ID')
-# ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams?organization={ORGANIZATION_ID}'
-# ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams'
 ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/organizations/{CUSTOMER_ORG_NAME}/groups'
 
 
