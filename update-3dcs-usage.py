@@ -35,7 +35,7 @@ DCS_PROCESSED_USAGE_DIR = os.path.join(DCS_DIR, 'usage-processed')
 os.makedirs(DCS_PROCESSED_USAGE_DIR, exist_ok=True)
 LOCK_FILE_PATH = os.path.join(DCS_DIR, 'update-3dcs-usage.lock')
 
-# See https://cloud.parallel.works/api/v2/organization
+# See https://cloud.parallel.works/api/organizations
 CUSTOMER_ORG_ID = '63572a4c1129281e00477a0c'
 PW_PLATFORM_HOST = os.environ.get('PW_PLATFORM_HOST')
 PW_API_KEY = os.environ.get('PW_API_KEY')
@@ -43,8 +43,6 @@ CUSTOMER_ORG_NAME = 'honda'
 HEADERS = {"Authorization": "Basic {}".format(encode_string_to_base64(PW_API_KEY))}
 
 GROUP_NAME: str = 'japan-3dcs-run-hours'
-#ORGANIZATION_URL: str = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams?organization={CUSTOMER_ORG_ID}'
-#ORGANIZATION_URL: str = f'https://{PW_PLATFORM_HOST}/api/v2/organization/teams'
 ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/organizations/{CUSTOMER_ORG_NAME}/groups'
 #ORGANIZATION_URL = f'https://{PW_PLATFORM_HOST}/api/organization/{CUSTOMER_ORG_NAME}/groups/{GROUP_NAME}'
 
