@@ -372,9 +372,10 @@ jobs:
     ssh:
       remoteHost: ${{ inputs.resource.ip }}
     steps:
-      - uses: marketplace/script_submitter/v3.6
+      - uses: github/parallelworks/workflows@canary
         early-cancel: any-job-failed
         with:
+          $yaml: workflows/script_submitter/v3.6/general.yaml
           resource: ${{ inputs.resource }}
           shebang: '#!/bin/bash'
           rundir: ${PW_PARENT_JOB_DIR}/job_dir_${{ matrix.job_id }}
@@ -432,10 +433,11 @@ jobs:
           cat scripts/merge/clean_job_directory.sh >> merge/merge.sh
           cat scripts/merge/transfer_outputs.sh >> merge/merge.sh
  
-      - uses: marketplace/script_submitter/v3.5
+      - uses: github/parallelworks/workflows@canary
         if: ${{ needs.merge.outputs.run_merge == "true" }}
         early-cancel: any-job-failed
         with:
+          $yaml: workflows/script_submitter/v3.6/general.yaml
           resource: ${{ inputs.resource }}
           shebang: '#!/bin/bash'
           rundir: ${PW_PARENT_JOB_DIR}/merge
