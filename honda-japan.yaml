@@ -7,11 +7,16 @@ jobs:
   local_preprocessing:
     steps:
 
+      - name: Checkout
+        uses: parallelworks/checkout
+        with:
+          repo: https://github.com/parallelworks/dcs-workflow.git
+          branch: v4
+
       - name: Sanity Checks
         run: |
           source /etc/profile.d/parallelworks.sh
           source /etc/profile.d/parallelworks-env.sh
-          source /pw/.miniconda3/etc/profile.d/conda.sh
 
           python3 scripts/get_group_allocation_balance.py ${{ inputs.run_hours_3dcs_group }} ${{ inputs.org_name }}
           if [ $? -ne 0 ]; then
