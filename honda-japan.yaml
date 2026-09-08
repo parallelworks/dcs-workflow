@@ -233,7 +233,7 @@ jobs:
           echo > scripts/plot_monitoring.sh
           echo > scripts/activate_monitoring.sh
           mv scripts/dry_run.sh scripts/run_dcs.sh
-          mv scripts/merge/dry_run.sh scripts/merge/dry_run.sh
+          mv scripts/merge/dry_run.sh scripts/merge/run_dcs.sh
 
 
       - name: Create Job Scripts
