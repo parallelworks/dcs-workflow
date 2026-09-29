@@ -373,7 +373,7 @@ jobs:
           - 39
           - 40
     if: ${{ matrix.job_id <= inputs.dcs.concurrency }}
-    working-directory: ${PW_PARENT_JOB_DIR}/job_dir_${{ matrix.job_id }}
+    working-directory: ${{ env.PW_PARENT_JOB_DIR }}/job_dir_${{ matrix.job_id }}
     ssh:
       remoteHost: ${{ inputs.resource.ip }}
     steps:
@@ -383,7 +383,7 @@ jobs:
           $yaml: workflows/script_submitter/v3.6/general.yaml
           resource: ${{ inputs.resource }}
           shebang: '#!/bin/bash'
-          rundir: ${PW_PARENT_JOB_DIR}/job_dir_${{ matrix.job_id }}
+          rundir: ${{ env.PW_PARENT_JOB_DIR }}/job_dir_${{ matrix.job_id }}
           use_existing_script: true
           script_path: ./run_case.sh
           define_cleanup_script: true
@@ -445,7 +445,7 @@ jobs:
           $yaml: workflows/script_submitter/v3.6/general.yaml
           resource: ${{ inputs.resource }}
           shebang: '#!/bin/bash'
-          rundir: ${PW_PARENT_JOB_DIR}/merge
+          rundir: ${{ env.PW_PARENT_JOB_DIR }}/merge
           use_existing_script: true
           script_path: ./merge.sh
           define_cleanup_script: true
