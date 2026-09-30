@@ -24,6 +24,38 @@ jobs:
               exit 1
           fi
 
+      - name: Increase SSH Session Limit
+        run: |
+          # Remote steps run as channels multiplexed over the executor's SSH connections to the
+          # resource. Past sshd's default MaxSessions (10) channels per connection, sshd refuses
+          # them ("no more sessions") and the run fails. A reload only applies to new connections,
+          # so raise the limit here, before any remote job connects.
+          ssh ${{ inputs.resource.ip }} 'bash -s' <<'EOF'
+          set -e
+          MAX_SESSIONS=500
+          MAX_STARTUPS="50:30:200"
+          SSHD_CONFIG=/etc/ssh/sshd_config
+
+          max_sessions=$(sudo -n sshd -T | awk '$1 == "maxsessions" {print $2}')
+          if [ "${max_sessions}" -ge "${MAX_SESSIONS}" ]; then
+              echo "$(date) INFO: sshd MaxSessions is already ${max_sessions}"
+              exit 0
+          fi
+
+          backup="${SSHD_CONFIG}.bak.$(date +%Y%m%d%H%M%S)"
+          sudo -n cp "${SSHD_CONFIG}" "${backup}"
+          # sshd keeps the first value it reads for each keyword, so these win over any later lines
+          sudo -n sed -i -e "1i MaxSessions ${MAX_SESSIONS}" -e "1i MaxStartups ${MAX_STARTUPS}" "${SSHD_CONFIG}"
+          if ! sudo -n sshd -t; then
+              echo "$(date) ERROR: Invalid sshd config. Restoring ${backup}" >&2
+              sudo -n cp "${backup}" "${SSHD_CONFIG}"
+              exit 1
+          fi
+          sudo -n systemctl reload sshd
+          echo "$(date) INFO: Raised sshd limits:"
+          sudo -n sshd -T | grep -E "^(maxsessions|maxstartups) "
+          EOF
+
   usage_metering:
     needs:
       - local_preprocessing
